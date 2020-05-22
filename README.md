@@ -1,1 +1,3 @@
 # vehicle-c
+
+cmake .
