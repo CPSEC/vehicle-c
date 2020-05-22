@@ -1,2 +1,4 @@
-Servo and Motor control\n
-Need to install PCA9685 library and WiringPi
+Servo and Motor control
+
+Need to install PCA9685 and WiringPi library
+
