@@ -45,56 +45,56 @@ int main(){
     
     //start read loop
     while(1){
-    	difference_total = 0;
-    	time_total = 0.0;
-    	
-	for(int i = 1; i <= 8; i++){
-		//get current position for the first time, record the current time in start
-		result1 = chalega_kya.Read(AS5048_CMD_ANGLE);
-		auto start = high_resolution_clock::now();
-
-		//get current position for the second time, record the current time in end
-		result2 = chalega_kya.Read(AS5048_CMD_ANGLE);
-		auto stop = high_resolution_clock::now();
-
-		//filter negative results
-		if(result1 < 0 || result2 < 0){
-			i--;
-			continue;
-		}
-		
-		//get duration in microseconds
-		auto duration = duration_cast<microseconds>(stop - start); 
-		
-		//time difference in second
-		time_taken = double(duration.count())/1000000.0;
-
-		//filter missed deadline result
-		if(time_taken > 0.0025 || time_taken < 0.0){
-          	i--;
-          	continue;
-          }
-          //cout << "time taken: "<<time_taken << endl;
-
-
-		//inverse degree difference
-		difference = (result2-result1)*(-1);
-		//cout<<"difference before modify: "<< difference << endl;
-
-		//resolve passing 0 degree point
-		if(difference < -10467) difference += 16383;
-          else if(difference > 10467) difference -= 16383;
-
-          //cout<< "difference after modify: " << difference << endl;
-
-          //sum degree difference, time difference
-		difference_total += difference;
-		time_total += time_taken;
-	}
-
-	speed = double(difference_total)/16383.0/time_total;
-	
-	
+        difference_total = 0;
+        time_total = 0.0;
+        
+        for(int i = 1; i <= 8; i++){
+            //get current position for the first time, record the current time in start
+            result1 = chalega_kya.Read(AS5048_CMD_ANGLE);
+            auto start = high_resolution_clock::now();
+            
+            //get current position for the second time, record the current time in end
+            result2 = chalega_kya.Read(AS5048_CMD_ANGLE);
+            auto stop = high_resolution_clock::now();
+            
+            //filter negative results
+            if(result1 < 0 || result2 < 0){
+                i--;
+                continue;
+            }
+            
+            //get duration in microseconds
+            auto duration = duration_cast<microseconds>(stop - start); 
+            
+            //time difference in second
+            time_taken = double(duration.count())/1000000.0;
+            
+            //filter missed deadline result
+            if(time_taken > 0.0025 || time_taken < 0.0){
+                i--;
+                continue;
+            }
+            //cout << "time taken: "<<time_taken << endl;
+            
+            
+            //inverse degree difference
+            difference = (result2-result1)*(-1);
+            //cout<<"difference before modify: "<< difference << endl;
+            
+            //resolve passing 0 degree point
+            if(difference < -10467) difference += 16383;
+            else if(difference > 10467) difference -= 16383;
+            
+            //cout<< "difference after modify: " << difference << endl;
+            
+            //sum degree difference, time difference
+            difference_total += difference;
+            time_total += time_taken;
+        }
+        
+        speed = double(difference_total)/16383.0/time_total;
+        
+        
         
         if(result1 == -1 || result2 == -1){
             //Clear Error
@@ -107,7 +107,7 @@ int main(){
             usleep(50000);
             
         }
-
+        
         
     }
     return 1;

@@ -16,19 +16,19 @@
 
 class As5048a {
 public:
-  As5048a(int csn, int frequency_divider);
-  ~As5048a();
-
-  const int Read(int reg_address);
-  static float Degrees(int angle_hex);
-  //static void IntToCharBuffer(char* buffer, int value, int nbytes);
-  //static int CharBufferToInt(char* buffer, int nbytes);
-
+    As5048a(int csn, int frequency_divider);
+    ~As5048a();
+    
+    const int Read(int reg_address);
+    static float Degrees(int angle_hex);
+    //static void IntToCharBuffer(char* buffer, int value, int nbytes);
+    //static int CharBufferToInt(char* buffer, int nbytes);
+    
 private:
-  int csn;
-  int freq_divider;
-  int EvenParityCalc(int value_16_bit);
-
+    int csn;
+    int freq_divider;
+    int EvenParityCalc(int value_16_bit);
+    
 };
 
 
