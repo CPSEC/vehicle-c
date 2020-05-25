@@ -7,6 +7,8 @@
 #include <string>
 #include <thread>
 
+class Car;
+
 using namespace std;
 
 class Part {
@@ -14,8 +16,9 @@ class Part {
     string name_;
     bool is_thread_;
     thread *thread_;
+    Car *car_;
 
-    Part(bool is_thread);
+    Part(Car *car,bool is_thread);
     virtual void StartSeq() = 0;
     virtual void StartThread() = 0;
     // virtual void Run() = 0;

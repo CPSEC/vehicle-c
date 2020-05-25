@@ -3,9 +3,10 @@
 
 #include "part.h"
 
+
 class Camera : public Part {
    public:
-    Camera(bool is_thread);
+    Camera(Car*car,bool is_thread);
     void Run(int test);
     virtual void StartSeq() override;
     virtual void StartThread() override;
