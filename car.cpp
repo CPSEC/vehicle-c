@@ -7,13 +7,14 @@
 
 Car::Car() {
     //
+    test=0;
     Init();
     StartAll();
 }
 
 void Car::Init() {
     // add parts
-    AddPart(new Camera(true));
+    AddPart(new Camera(this,true));
 }
 
 void Car::AddPart(Part *p) {
@@ -29,7 +30,7 @@ void Car::AddPart(Part *p) {
 void Car::StartSequence() {
     // start parts need to be executed sequentially
     while (true) {
-        cout << "test" << endl;
+        cout << "test:"<<test << endl;
         for (pair<const string, Part *> &sp : seq_parts_) {
             sp.second->StartSeq();
         }

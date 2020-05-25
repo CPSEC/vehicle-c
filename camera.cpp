@@ -1,8 +1,8 @@
 #include "camera.h"
-
+#include "car.h"
 #include <iostream>
 
-Camera::Camera(bool is_thread) : Part(is_thread) {
+Camera::Camera(Car*car,bool is_thread) : Part(car,is_thread) {
     //
     name_ = "Camera thread";
 }
@@ -16,6 +16,7 @@ void Camera::Run(int test) {
     while (times) {
         start = chrono::system_clock::now();
         cout << test << endl;
+        car_->test+=1;
         this_thread::sleep_for(chrono::seconds(1));
         end = chrono::system_clock::now();
         cout << chrono::duration_cast<chrono::milliseconds>(end - start).count()
