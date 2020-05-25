@@ -2,6 +2,8 @@
 
 Compile:
 	cd ./build
+
 	cmake ../
+
 	make
 
