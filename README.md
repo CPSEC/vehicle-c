@@ -1,3 +1,7 @@
 # vehicle-c
 
-cmake .
+Compile:
+	cd ./build
+	cmake ../
+	make
+
