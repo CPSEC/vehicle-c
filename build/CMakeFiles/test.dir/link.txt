@@ -1,0 +1,1 @@
+/usr/bin/c++  -pthread  -rdynamic CMakeFiles/test.dir/camera.o CMakeFiles/test.dir/car.o CMakeFiles/test.dir/main.o CMakeFiles/test.dir/part.o  -o test 
