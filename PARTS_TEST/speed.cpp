@@ -7,15 +7,11 @@ using namespace std::chrono;
 using namespace std;
 #include "speed.h"
 
-Speed::Speed(Car car, bool is_thread){
+Speed::Speed(Car* car, bool is_thread){
     name_ = "Speed thread";
 }
 
 Void Speed::Run(){
-    
-}
-
-void Speed::StartSeq(){
     //initial
     int result1 = 0;
     int result2 = 0;
@@ -83,6 +79,10 @@ void Speed::StartSeq(){
         }
         
     }
+}
+
+void Speed::StartSeq(){
+    
 }
 
 void Speed::StartThread(){
