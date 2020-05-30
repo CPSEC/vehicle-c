@@ -3,8 +3,10 @@
 Compile:
 
 1. cd ./build
-2. cmake ../
-3. make
+2. rm CMakeCache.txt
+3. cmake ../
+4. make clean
+5. make
 
 
 Threads:
