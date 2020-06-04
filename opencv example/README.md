@@ -1,4 +1,5 @@
 opencv version 3
 
-g++ advance_lane_line-detection.cpp `pkg-config --cflags --libs opencv`
-./a.out
+How ro run
+1. g++ advance_lane_line-detection.cpp `pkg-config --cflags --libs opencv`
+2. ./a.out
