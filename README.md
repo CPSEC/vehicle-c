@@ -2,11 +2,11 @@
 
 Compile:
 
-1. cd ./build
-2. rm CMakeCache.txt
+1. mkdir build
+2. cd ./build
 3. cmake ../
-4. make clean
-5. make
+4. make
+
 
 
 Threads:
