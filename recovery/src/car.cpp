@@ -127,6 +127,8 @@ void Car::SaveState(string part_name) {
     criu_set_images_dir_fd(fd);
     criu_set_leave_running(true);
     criu_set_shell_job(true);
+    criu_set_log_file("dump.log");
+    criu_set_log_level(4);
     criu_dump();
 }
 
@@ -150,5 +152,7 @@ void Car::RestoreState(string part_name) {
     int fd = open((char *)dir.c_str(), O_DIRECTORY);
     criu_set_images_dir_fd(fd);
     criu_set_shell_job(true);
+    criu_set_log_file("resotre.log");
+    criu_set_log_level(4);
     criu_restore();
 }
