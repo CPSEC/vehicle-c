@@ -5,6 +5,7 @@
 using namespace std;
 
 #define SHARED_MEMORY_KEY 4444
+#define MEM_NAME "shared_memory_name"
 #define HEARTBEAT_INTERVAL 5
 
 #define PART_NUMBER 8
