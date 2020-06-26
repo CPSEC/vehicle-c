@@ -4,10 +4,18 @@
 
 // example
 #include "camera.h"
+#include "speed.h"
+#include "pca.h"
+#include "throttlePID.h"
+#include "servoPID.h"
 
 Car::Car() {
     //
     test=0;
+    speed = 0.0;
+    direction = 1.5;
+    target_speed = 50;
+    target_direction = 1.5;
     Init();
     StartAll();
 }
@@ -15,6 +23,10 @@ Car::Car() {
 void Car::Init() {
     // add parts
     AddPart(new Camera(this,true));
+    AddPart(new Speed(this));
+    AddPart(new Pca(this));
+    AddPart(new ThrottlePID(this));
+    AddPart(new ServoPID(this));
 }
 
 void Car::AddPart(Part *p) {
@@ -30,7 +42,7 @@ void Car::AddPart(Part *p) {
 void Car::StartSequence() {
     // start parts need to be executed sequentially
     while (true) {
-        cout << "test:"<<test << endl;
+        cout << "speed:"<< speed << endl;
         for (pair<const string, Part *> &sp : seq_parts_) {
             sp.second->StartSeq();
         }

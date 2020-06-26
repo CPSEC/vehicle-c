@@ -15,6 +15,10 @@ class Camera;
 class Car {
    public:
     int test;
+    double speed;
+    double direction;
+    double target_direction;
+    double target_speed;
     unordered_map<string, Part *> thread_parts_;
     unordered_map<string, Part *> seq_parts_;
 
