@@ -2,26 +2,26 @@
 #define _SHARE_H
 
 #include <ctime>
+
+#include "pca.h"
+
 using namespace std;
 
-#define SHARED_MEMORY_KEY 4444
 #define MEM_NAME "shared_memory_name"
 #define HEARTBEAT_INTERVAL 5
 
 #define PART_NUMBER 8
-enum class PartType : int { camera, other };
+enum class PartType : int { camera, servoPID, throttlePID, speed };
 
 class State {
    public:
-    int speed_;
-    int img_;
+    double speed_;
+    double direction_;
+    double target_speed_;
+    double target_direction_;
+    Pca* pca_;
     time_t part_heartbeat[PART_NUMBER];
-    // static State* shared_state_;
     static State* ShareMemoryInit();
-    // static State* GetState();
-    State(int speed);
-    int GetSpeed();
-    void SetSpeed(int speed);
 };
 
 #endif

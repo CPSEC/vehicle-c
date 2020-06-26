@@ -11,45 +11,80 @@
 #include "camera.h"
 #include "criu.h"
 #include "part.h"
+#include "pca.h"
+#include "servoPID.h"
+#include "speed.h"
+#include "throttlePID.h"
 
 using namespace std;
 
 Car::Car() {
     cout << __FUNCTION__ << endl;
-    state = State::ShareMemoryInit();
-    state->speed_ = 0;
-    state->img_ = 0;
-    state->part_heartbeat[0] = time(NULL);
-    // state->part_heartbeat["camera"] = time(NULL);
-    part_pid["camera"] = -1;
     Init();
 }
 
 void Car::Init() {
     cout << __FUNCTION__ << endl;
+    InitState();
+    AddPart();
     CreateStateDir();
     ForkPart();
     cout << "init finished" << endl;
 }
 
+void Car::InitState() {
+    state = State::ShareMemoryInit();
+    state->speed_ = 0;
+    state->direction_ = 0;
+    state->target_speed_ = 0;
+    state->target_direction_ = 0;
+    state->pca_ = new Pca();
+}
+
+void Car::AddPart() {
+    part_pid[PartType::camera] = -1;
+    part_pid[PartType::servoPID] = -1;
+    part_pid[PartType::throttlePID] = -1;
+    part_pid[PartType::speed] = -1;
+}
+
+void Car::AddHeatbeat() {
+    // state->part_heartbeat["camera"] = time(NULL);
+    //
+}
+
 void Car::ForkPart() {
     cout << __FUNCTION__ << endl;
-    for (pair<string, time_t> pr : part_pid) {
+    for (pair<PartType, time_t> pr : part_pid) {
         pid_t pid = fork();
         if (pid < 0) {
-            // err
             cerr << "part fork err" << endl;
         } else if (pid == 0) {
             // part
             Part *part = nullptr;
-            if (pr.first == "camera") {
-                part = new Camera();
+            switch (pr.first) {
+                case PartType::camera:
+                    part = new Camera();
+                    break;
+                case PartType::pca:
+                    break;
+                case PartType::servoPID:
+                    part = new ServoPID();
+                    break;
+                case PartType::throttlePID:
+                    part = new ThrottlePID();
+                    break;
+                case PartType::speed:
+                    part = new Speed();
+                    break;
+                default:
+                    break;
             }
             if (part == nullptr) {
                 cerr << "fork part err" << endl;
             } else {
                 part->Run();
-                cout << "start part" << pr.first << endl;
+                cout << "start part" << (int)pr.first << endl;
             }
         } else {
             // car
@@ -63,8 +98,7 @@ void Car::ForkPart() {
 void Car::Run() {
     int i = 0;
     while (true) {
-        cout << "car" << state->img_ << endl;
-        for (pair<string, pid_t> pr : part_pid) {
+        for (pair<PartType, pid_t> pr : part_pid) {
             if (i < 5) {
                 SaveState(pr.first);
             } else if (i == 5) {
@@ -96,33 +130,19 @@ void Car::Run() {
 void Car::CreateStateDir() {
     cout << __FUNCTION__ << endl;
     mkdir("checkpoint", 0777);
-    for (pair<string, pid_t> pr : part_pid) {
-        string dir = "./checkpoint/" + pr.first;
+    for (pair<PartType, pid_t> pr : part_pid) {
+        string dir = "./checkpoint/" + to_string((int)pr.first);
         if (mkdir(dir.c_str(), 0777) == -1) {
-            cerr << "mkdir failed " << pr.first << endl;
+            cerr << "mkdir failed " << (int)pr.first << endl;
         }
     }
 }
 
-void Car::SaveState(string part_name) {
+void Car::SaveState(PartType part) {
     cout << __FUNCTION__ << endl;
-    string dir = "./checkpoint/" + part_name;
-    char pid_buf[16];
-    sprintf(pid_buf, "%d", (int)part_pid[part_name]);
-    char *cmd[] = {"sudo", "criu", "dump",  "-D", (char *)dir.c_str(),
-                   "-R",   "-t",   pid_buf, NULL};
-    // pid_t pid = fork();
-    // if (pid < 0) {
-    //     //
-    // } else if (pid == 0) {
-    //     // child
-    //     execvp("sudo", cmd);
-    // } else {
-    //     // parent
-    //     // waitpid(pid,nullptr,WNOHANG);
-    // }
+    string dir = "./checkpoint/" + to_string((int)part);
     if (criu_init_opts() == -1) cout << "criu init failed" << endl;
-    criu_set_pid(part_pid[part_name]);
+    criu_set_pid(part_pid[part]);
     int fd = open((char *)dir.c_str(), O_DIRECTORY);
     criu_set_images_dir_fd(fd);
     criu_set_leave_running(true);
@@ -132,22 +152,9 @@ void Car::SaveState(string part_name) {
     criu_dump();
 }
 
-void Car::RestoreState(string part_name) {
+void Car::RestoreState(PartType part) {
     cout << __FUNCTION__ << endl;
-    string dir = "./checkpoint/" + part_name;
-    // char pid_buf[16];
-    // sprintf(pid_buf, "%d", (int)part_pid[part_name]);
-    char *cmd[] = {"sudo", "criu", "restore", "-D", (char *)dir.c_str(), NULL};
-    // pid_t pid = fork();
-    // if (pid < 0) {
-    //     //
-    // } else if (pid == 0) {
-    //     // child
-    //     execvp("sudo", cmd);
-    // } else {
-    //     // parent
-    //     // waitpid(pid,nullptr,WNOHANG);
-    // }
+    string dir = "./checkpoint/" + to_string((int)part);
     if (criu_init_opts() == -1) cout << "criu init failed" << endl;
     int fd = open((char *)dir.c_str(), O_DIRECTORY);
     criu_set_images_dir_fd(fd);

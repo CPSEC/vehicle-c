@@ -13,15 +13,18 @@ class Part;
 class Car {
    public:
     State* state;
-    unordered_map<string, pid_t> part_pid;
+    unordered_map<PartType, pid_t> part_pid;
     Car();
     void Init();
+    void InitState();
+    void AddPart();
+    void AddHeatbeat();
     void CreateStateDir();
     void ForkPart();
     void Run();
 
-    void SaveState(string part_name);
-    void RestoreState(string part_name);
+    void SaveState(PartType part);
+    void RestoreState(PartType part);
 };
 
 #endif
