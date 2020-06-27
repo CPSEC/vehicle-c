@@ -15,6 +15,7 @@ class Part {
     virtual void WaitCompulsiveCheckpoint();
     virtual void UpdateAverageCycleTime(timeval& tv_start, timeval& tv_end);
     virtual void UpdateIsNewData();
+    virtual void WaitNeededNewData();
     virtual void Run();
     virtual void RunALL();
     virtual ~Part();

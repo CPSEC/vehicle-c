@@ -28,16 +28,29 @@ void Part::UpdateAverageCycleTime(timeval& tv_start, timeval& tv_end) {
             (state_->average_time_with_cycles[(int)part_type_] + t) / 2;
     }
 }
+
+// wait until needed data is new data
+// double speed_;
+// double direction_;
+// double target_speed_;
+// double target_direction_;
+void Part::WaitNeededNewData() {
+    // while (state_->is_new_data[(int)part_type_] == false) {
+    //     usleep(50);
+    // }
+    // state_->is_new_data[(int)part_type_] = false;
+}
+
+// update output data to new data
+void Part::UpdateIsNewData() {}
+
 // Run for one cycle
 void Part::Run(){};
 
 // a loop for one all things need to do
 void Part::RunALL() {
     while (true) {
-        while (state_->is_new_data[(int)part_type_] == false) {
-            usleep(50);
-        }
-        state_->is_new_data[(int)part_type_] = false;
+        WaitNeededNewData();
         timeval tv_start, tv_end;
         gettimeofday(&tv_start, nullptr);
         Run();

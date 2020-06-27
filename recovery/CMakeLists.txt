@@ -5,7 +5,9 @@ project(recovery)
 set(CMAKE_CXX_FLAGS "-std=c++17")
 set(CMAKE_CXX_FLAGS "`pkg-config --cflags --libs opencv`")
 
-include_directories(./src ./lib /usr/local/include/criu)
+include_directories(./src ./lib )
+include_directories(/usr/local/include/criu)
+
 aux_source_directory(./src ./lib DIR_SRCS)
 
 add_executable(recovery ${DIR_SRCS})

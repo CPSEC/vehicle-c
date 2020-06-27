@@ -12,6 +12,7 @@ using namespace std;
 #define HEARTBEAT_INTERVAL 5
 
 #define PART_NUMBER 4
+#define DATA_NUMBER 4
 enum class PartType : int { camera, servoPID, throttlePID, speed };
 
 class State {
@@ -22,7 +23,7 @@ class State {
     double target_direction_;
 
     // indicate if the 4 variable above is new data or not
-    bool is_new_data[PART_NUMBER];
+    bool is_new_data[DATA_NUMBER];
 
     // indicate if the corresponding part need a compulsive checkpoint
     bool need_compulsive_checkpoint[PART_NUMBER];
