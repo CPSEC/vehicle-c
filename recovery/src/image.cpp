@@ -7,9 +7,12 @@
 #include <opencv2/opencv.hpp>
 #include <sstream>
 
-#include "raspicam_cv.h"
+#include "raspicam/src/raspicam_cv.h"
 using namespace cv;
 using namespace std;
+
+int Divs = 50;
+bool doTestSpeedOnly = false;
 
 int findParam(string param, int argc, char** argv) {
     int idx = -1;
@@ -17,7 +20,8 @@ int findParam(string param, int argc, char** argv) {
         if (string(argv[i]) == param) idx = i;
     return idx;
 }
-
+// parse command line
+// returns the value of a command line param. If not found, defvalue is returned
 float getParamVal(string param, int argc, char** argv, float defvalue = -1) {
     int idx = -1;
     for (int i = 0; i < argc && idx == -1; i++)
@@ -41,6 +45,12 @@ void processCommandLine(int argc, char** argv, raspicam::RaspiCam_Cv& Camera) {
     if (findParam("-test_speed", argc, argv) != -1) doTestSpeedOnly = true;
     if (findParam("-ss", argc, argv) != -1)
         Camera.set(cv::CAP_PROP_EXPOSURE, getParamVal("-ss", argc, argv));
+
+    //     Camera.setSharpness ( getParamVal ( "-sh",argc,argv,0 ) );
+    //     if ( findParam ( "-vs",argc,argv ) !=-1 )
+    //         Camera.setVideoStabilization ( true );
+    //     Camera.setExposureCompensation ( getParamVal ( "-ev",argc,argv ,0 )
+    //     );
 }
 
 void showUsage() {
@@ -72,6 +82,7 @@ Point3d PointTimes(float c, Point3d p) {
     return p;
 }
 
+// P1*t^3 + P2*3*t^2*(1-t) + P3*3*t*(1-t)^2 + P4*(1-t)^3 = Pnew
 Point3d Bernstein(float u, Point3d* p) {
     Point3d a, b, c, d, r;
     a = PointTimes(pow(u, 3), p[0]);
@@ -192,9 +203,7 @@ void abs_sobel_thresh(const cv::Mat& src, cv::Mat& dst, const char& orient,
                       const int& thresh_min, const int& thresh_max) {
     cv::Mat src_gray, grad;
     cv::Mat abs_gray;
-
     cv::cvtColor(src, src_gray, cv::COLOR_RGB2GRAY);
-
     if (orient == 'x') {
         cv::Sobel(src_gray, grad, CV_64F, 1, 0);
         cv::convertScaleAbs(grad, abs_gray);
@@ -203,7 +212,6 @@ void abs_sobel_thresh(const cv::Mat& src, cv::Mat& dst, const char& orient,
         cv::Sobel(src_gray, grad, CV_64F, 0, 1);
         cv::convertScaleAbs(grad, abs_gray);
     }
-
     cv::inRange(abs_gray, thresh_min, thresh_max, dst);
 }
 
@@ -212,9 +220,7 @@ void hls_select(const cv::Mat& src, cv::Mat& dst, const char& channel,
     cv::Mat hls, grad;
     vector<cv::Mat> channels;
     cv::cvtColor(src, hls, cv::COLOR_RGB2HLS);
-
     cv::split(hls, channels);
-
     switch (channel) {
         case 'h':
             grad = channels.at(0);
@@ -228,7 +234,6 @@ void hls_select(const cv::Mat& src, cv::Mat& dst, const char& channel,
         default:
             break;
     }
-
     cv::inRange(grad, thresh_min, thresh_max, dst);
 }
 
@@ -237,9 +242,7 @@ void luv_select(const cv::Mat& src, cv::Mat& dst, const char& channel,
     cv::Mat luv, grad;
     vector<cv::Mat> channels;
     cv::cvtColor(src, luv, cv::COLOR_RGB2Luv);
-
     cv::split(luv, channels);
-
     switch (channel) {
         case 'l':
             grad = channels.at(0);
@@ -253,7 +256,6 @@ void luv_select(const cv::Mat& src, cv::Mat& dst, const char& channel,
         default:
             break;
     }
-
     cv::inRange(grad, thresh_min, thresh_max, dst);
 }
 
@@ -261,16 +263,11 @@ void mag_thresh(const cv::Mat& src, cv::Mat& dst, const int& sobel_kernel,
                 const int& thresh_min, const int& thresh_max) {
     cv::Mat src_gray, gray_x, gray_y, grad;
     cv::Mat abs_gray_x, abs_gray_y;
-
     cv::cvtColor(src, src_gray, cv::COLOR_RGB2GRAY);
-
     cv::Sobel(src_gray, gray_x, CV_64F, 1, 0, sobel_kernel);
     cv::Sobel(src_gray, gray_y, CV_64F, 0, 1, sobel_kernel);
-
     cv::convertScaleAbs(gray_x, abs_gray_x);
     cv::convertScaleAbs(gray_y, abs_gray_y);
-
     cv::addWeighted(abs_gray_x, 0.5, abs_gray_y, 0.5, 0, grad);
-
     cv::inRange(grad, thresh_min, thresh_max, dst);
 }

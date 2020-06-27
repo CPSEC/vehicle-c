@@ -1,17 +1,27 @@
 #include "camera.h"
 
+#include <chrono>
+#include <fstream>
 #include <iostream>
 
 #include "car.h"
 #include "image.h"
+#include "raspicam/src/raspicam_cv.h"
+using namespace std::chrono;
 using namespace std;
 
-Camera::Camera() : Part(PartType::camera) {
+Camera::Camera() : Part(PartType::camera) {}
+
+void Camera::Run(int test) {
+    int times = 1;
+
+    VideoCapture Capture("../project_video.mp4");
     Mat Frame, TempImage, ImageDest, LabImage, HlsImage, ThreshImage,
         ThreshImagez, ThreshImagey, FinalDisp, H, Hinv;
     Mat DispImage = Mat::zeros(720, 1280, CV_8UC1);
     Mat WinSlip = Mat::zeros(720, 1280, CV_8UC1);
     Mat absm, mag, hls, luv, lab, dst, persp, blur;
+    Mat Frame1;
 
     vector<vector<Point>> Contours;
     vector<Vec4i> Hierarchy;
@@ -39,52 +49,22 @@ Camera::Camera() : Part(PartType::camera) {
 
     cout << "Connected to camera =" << Camera.getId() << endl;
 
-    cout << "Sleeping for 3 secs" << endl;
+    Camera.set(cv::CAP_PROP_FRAME_WIDTH, 1280);
+    Camera.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
 
-    Camera.set(cv::CAP_PROP_FPS, 120);
+    int t = 100;
+    ofstream file;
+    file.open("camera times.txt");
+    while (t > 0) {
+        auto start1 = high_resolution_clock::now();
+        Capture.read(Frame);
 
-    double time_ = cv::getTickCount();
-}
+        auto stop1 = high_resolution_clock::now();
+        file << "capture: "
+             << double(duration_cast<microseconds>(stop1 - start1).count())
+             << endl;
 
-void Camera::Run() {
-    int times = 1;
-    chrono::system_clock::time_point start;
-    chrono::system_clock::time_point end;
-
-    VideoCapture Capture("./project_video.mp4");
-    Mat Frame, TempImage, ImageDest, LabImage, HlsImage, ThreshImage,
-        ThreshImagez, ThreshImagey, FinalDisp, H, Hinv;
-    Mat DispImage = Mat::zeros(720, 1280, CV_8UC1);
-    Mat WinSlip = Mat::zeros(720, 1280, CV_8UC1);
-    Mat absm, mag, hls, luv, lab, dst, persp, blur;
-
-    vector<vector<Point>> Contours;
-    vector<Vec4i> Hierarchy;
-    vector<Point2f> DestSrc;
-    vector<Mat> Channels;
-
-    UserData Data;
-
-    int Array[1280] = {0};
-    int LeftBaseTemp = 0;
-    int RightBaseTemp = 0;
-    int LeftBase = 10000, Thresh = 720, RightBase = 10000;
-    int Lock = 0;
-
-    double lxPositon = -1, rxPositon = -1, lNum = 0, rNum = 0, Cur = 0.0,
-           distance = 0.0, r = 0.0;
-    Point3d ControlPts[40];
-    Point3d ControlPtsR[40];
-    Point Cura, Curb, Curc;
-    uchar* CurrRowP;
-
-    while (1)
-
-    {
-        Camera.grab();
-        Camera.retrieve(Frame);
-        Camera.release();
-
+        start1 = high_resolution_clock::now();
         TempImage = Frame.clone();
         Data.Image = TempImage;
 
@@ -128,7 +108,6 @@ void Camera::Run() {
                     }
                 }
             }
-
             Thresh = 720;
             for (int row = 0; row < Frame.rows; row++) {
                 for (int col = Frame.cols / 2; col < Frame.cols; col++) {
@@ -140,7 +119,6 @@ void Camera::Run() {
                     }
                 }
             }
-
             ControlPts[0].x = LeftBase;
             ControlPts[0].y = 720;
             ControlPts[0].z = 0;
@@ -164,12 +142,12 @@ void Camera::Run() {
                  LINE_AA);
         }
         cv::cvtColor(ThreshImage, ThreshImage, COLOR_GRAY2BGR);
-
         for (int i = 0; i < 12; i++) {
             for (int WinRow = 720 - 60 * (i + 1); WinRow < 720 - 60 * (i);
                  WinRow++) {
                 CurrRowP = ThreshImage.ptr<uchar>(WinRow);
                 CurrRowP += ((LeftBase - 75) * 3);
+
                 for (int lWinCol = LeftBase - 75; lWinCol < LeftBase + 75;
                      lWinCol++) {
                     if (((*CurrRowP) != 0) || ((*(CurrRowP + 1)) != 0) ||
@@ -240,7 +218,6 @@ void Camera::Run() {
                      LINE_AA);
             }
         }
-
         DrawBezier(WinSlip, ControlPts);
         DrawBezier(WinSlip, ControlPtsR);
 
@@ -270,17 +247,18 @@ void Camera::Run() {
 
         FinalDisp = Frame * 0.8 + TempImage * 0.2;
 
-        cout << "Curve: " << Cur << endl;
-    }
-
-    while (times) {
-        start = chrono::system_clock::now();
-
-        end = chrono::system_clock::now();
-        cout << chrono::duration_cast<chrono::milliseconds>(end - start).count()
+        stop1 = high_resolution_clock::now();
+        file << "process: "
+             << double(duration_cast<microseconds>(stop1 - start1).count())
              << endl;
 
-        cout << "target_direction: " << car_->target_direction << endl;
+        cout << "Curve: " << Cur << endl;
+
+        t--;
+    }
+    file.close();
+
+    while (times) {
     }
 }
 

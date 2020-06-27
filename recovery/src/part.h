@@ -11,13 +11,12 @@ class Part {
     PartType part_type_;
     State* state_;
     Part(PartType parttype);
-    // for pca control
-    // virtual void setSpeed(float pulse){};
-    // virtual void setDirect(float pulse){};
-    // virtual void setRGB(int rv, int gv, int bv){};
-    // virtual void resetRGB(){};
-    //
+    virtual void SetCompulsiveCheckpoint();
+    virtual void WaitCompulsiveCheckpoint();
+    virtual void UpdateAverageCycleTime(timeval& tv_start, timeval& tv_end);
+    virtual void UpdateIsNewData();
     virtual void Run();
+    virtual void RunALL();
     virtual ~Part();
 };
 

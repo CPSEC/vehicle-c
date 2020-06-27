@@ -12,19 +12,21 @@ class Part;
 
 class Car {
    public:
-    State* state;
-    unordered_map<PartType, pid_t> part_pid;
+    State* state_;
+    unordered_map<PartType, pid_t> part_pid_;
     Car();
     void Init();
     void InitState();
     void AddPart();
-    void AddHeatbeat();
     void CreateStateDir();
     void ForkPart();
     void Run();
 
     void SaveState(PartType part);
     void RestoreState(PartType part);
+    void SimulateFalut(PartType part);
+    void CheckCompulsiveCheckpoint();
+    void CheckUnitCheckpoint();
 };
 
 #endif
