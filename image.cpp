@@ -6,9 +6,12 @@
 #include <cstdlib>
 #include <fstream>
 #include <sstream>
-#include "raspicam_cv.h"
+#include "raspicam/src/raspicam_cv.h"
 using namespace cv;
 using namespace std;
+
+int Divs = 50;
+bool doTestSpeedOnly = false;
 
 int findParam ( string param,int argc,char **argv ) {
     int idx=-1;
