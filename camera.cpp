@@ -1,7 +1,11 @@
 #include "camera.h"
 #include "car.h"
 #include "image.h"
+#include "raspicam/src/raspicam_cv.h"
 #include <iostream>
+#include <fstream>
+#include <chrono>
+using namespace std::chrono;
 using namespace std;
 
 Camera::Camera(Car*car,bool is_thread) : Part(car,is_thread) {
@@ -10,110 +14,111 @@ Camera::Camera(Car*car,bool is_thread) : Part(car,is_thread) {
     car_ = car;
     is_thread_ = true;
     
-    Mat Frame, TempImage, ImageDest, LabImage, HlsImage, ThreshImage, ThreshImagez, ThreshImagey, FinalDisp, H, Hinv;
-    Mat DispImage = Mat::zeros(720, 1280, CV_8UC1);
-    Mat WinSlip = Mat::zeros(720, 1280, CV_8UC1);  //��ʾ������
-    Mat absm, mag, hls, luv, lab, dst, persp, blur;
-
-    vector<vector<Point>> Contours;
-    vector<Vec4i> Hierarchy;
-    vector<Point2f> DestSrc;
-    vector<Mat> Channels;
-
-    UserData Data;
-
-    int Array[1280] = { 0 };
-    int LeftBaseTemp = 0;
-    int RightBaseTemp = 0;
-    int LeftBase = 10000, Thresh = 720, RightBase = 10000;
-    int Lock = 0;
-
-    double lxPositon = -1, rxPositon = -1, lNum = 0, rNum = 0, Cur = 0.0, distance = 0.0, r = 0.0;
-    Point3d ControlPts[40];
-    Point3d ControlPtsR[40];
-    Point Cura, Curb, Curc;  //���������ڼ������ʰ뾶
-    uchar* CurrRowP;
-
-
-    raspicam::RaspiCam_Cv Camera;
-    //processCommandLine ( argc,argv,Camera );
-    cout<<"Connecting to camera"<<endl;
-//    if ( !Camera.open() ) {
-//        cerr<<"Error opening camera"<<endl;
-//        return -1;
-//    }
-    cout<<"Connected to camera ="<<Camera.getId() <<endl;
-    //cv::Mat image;
-
-    //wait a while until camera stabilizes
-    cout<<"Sleeping for 3 secs"<<endl;
-
-
-    Camera.set (cv::CAP_PROP_FPS, 120);
-
-    double time_=cv::getTickCount();
-
+    
+    
+    
+    
+    //double time_=cv::getTickCount();
+    
 }
 
 void Camera::Run(int test) {
     //
     int times = 1;
-    chrono::system_clock::time_point start;
-    chrono::system_clock::time_point end;
-
-
-        VideoCapture Capture("./project_video.mp4");
+    
+    //VideoCapture Capture(0);
+    VideoCapture Capture("/home/pi/vehicle-c/project_video.mp4");
     Mat Frame, TempImage, ImageDest, LabImage, HlsImage, ThreshImage, ThreshImagez, ThreshImagey, FinalDisp, H, Hinv;
     Mat DispImage = Mat::zeros(720, 1280, CV_8UC1);
     Mat WinSlip = Mat::zeros(720, 1280, CV_8UC1);  //��ʾ������
     Mat absm, mag, hls, luv, lab, dst, persp, blur;
-
+    Mat Frame1;
+    
     vector<vector<Point>> Contours;
     vector<Vec4i> Hierarchy;
     vector<Point2f> DestSrc;
     vector<Mat> Channels;
-
+    
     UserData Data;
-
+    
     int Array[1280] = { 0 };
     int LeftBaseTemp = 0;
     int RightBaseTemp = 0;
     int LeftBase = 10000, Thresh = 720, RightBase = 10000;
     int Lock = 0;
-
+    
     double lxPositon = -1, rxPositon = -1, lNum = 0, rNum = 0, Cur = 0.0, distance = 0.0, r = 0.0;
     Point3d ControlPts[40];
     Point3d ControlPtsR[40];
     Point Cura, Curb, Curc;  //���������ڼ������ʰ뾶
     uchar* CurrRowP;
+    
+    
+    //    raspicam::RaspiCam_Cv Camera;
+    //    processCommandLine ( argc,argv,Camera );
+    //    cout<<"Connecting to camera"<<endl;
+    //    if ( !Camera.open() ) {
+    //        cerr<<"Error opening camera"<<endl;
+    //        return -1;
+    //    }
+    //    cout<<"Connected to camera ="<<Camera.getId() <<endl;
+    //    //cv::Mat image;
+    //
+    //    //wait a while until camera stabilizes
+    //    cout<<"Sleeping for 3 secs"<<endl;
+    //
+    //
+    //    Camera.set (cv::CAP_PROP_FPS, 120);
+    //
+    //    double time_=cv::getTickCount();
+    //
 
-
-//    raspicam::RaspiCam_Cv Camera;
-//    processCommandLine ( argc,argv,Camera );
-//    cout<<"Connecting to camera"<<endl;
-//    if ( !Camera.open() ) {
-//        cerr<<"Error opening camera"<<endl;
-//        return -1;
+    raspicam::RaspiCam_Cv Camera;
+    //Camera.open();
+    //processCommandLine ( argc,argv,Camera );
+    cout<<"Connecting to camera"<<endl;
+    //    if ( !Camera.open() ) {
+    //        cerr<<"Error opening camera"<<endl;
+    //        return -1;
+    //    }
+    cout<<"Connected to camera ="<<Camera.getId() <<endl;
+    //cv::Mat image;
+    
+    //wait a while until camera stabilizes
+    //cout<<"Sleeping for 3 secs"<<endl;
+    Camera.set ( cv::CAP_PROP_FRAME_WIDTH, 1280);
+    Camera.set ( cv::CAP_PROP_FRAME_HEIGHT, 720 );
+    
+    
+//    Camera.grab();
+//    if ( !Camera.grab ( ) ) {
+//        cout<<"Error in grab"<<endl;
 //    }
-//    cout<<"Connected to camera ="<<Camera.getId() <<endl;
-//    //cv::Mat image;
+//    Camera.retrieve (Frame);
+//    cv::imwrite ("f.jpg",Frame);
 //
-//    //wait a while until camera stabilizes
-//    cout<<"Sleeping for 3 secs"<<endl;
-//
-//
-//    Camera.set (cv::CAP_PROP_FPS, 120);
-//
-//    double time_=cv::getTickCount();
-//
-
-    while(1)
-        //while (Capture.read(Frame))
-    {
-        Camera.grab();
-        Camera.retrieve (Frame);
-        Camera.release();
-
+//    Capture.read(Frame1);
+//    cv::imwrite ("f1.jpg",Frame1);
+    
+   // while(1){
+    int t = 100;
+    ofstream file;
+    file.open("camera times.txt");
+    while (t>0){
+//        cout<<"ahhhhhhhhhhhhhhh"<<endl;
+        auto start1 = high_resolution_clock::now();
+        Capture.read(Frame);
+        //cout << "test" << endl;
+        auto stop1 = high_resolution_clock::now();
+        file << "capture: " << double(duration_cast<microseconds>(stop1 - start1).count()) << endl;
+        
+        
+//        Camera.grab();
+//        Camera.retrieve(Frame);
+//        Capture(Frame);
+//        Capture.read(Frame);
+//        cout<<"bquoirglijhlhqijqrblfuhjwelbfkhqijwbfewfnjq"<<endl;
+        start1 = high_resolution_clock::now();
         TempImage = Frame.clone();
         Data.Image = TempImage;
 
@@ -128,7 +133,6 @@ void Camera::Run(int test) {
         ImageDest = Mat::zeros(Frame.size(), CV_8UC3);
         WinSlip = Mat::zeros(720, 1280, CV_8UC1);
         Mat Test = Mat::zeros(720, 1280, CV_8UC1);
-
 
         //ͳ��ÿ�а׵�ĸ���
         if (0 == Lock)  //��һ�ν���
@@ -169,7 +173,6 @@ void Camera::Run(int test) {
                     }
                 }
             }
-
             Thresh = 720;  //���¸���һ��Ĭ��ֵ,ȥ����һ�γ���ֵ������Ӱ��
             for (int row = 0; row < Frame.rows; row++)
             {
@@ -185,7 +188,6 @@ void Camera::Run(int test) {
                     }
                 }
             }
-
             ControlPts[0].x = LeftBase;  //��һ֡ͼ������ֱ��ͼ�ҵ��󳵵��ߵĴ���λ��
             ControlPts[0].y = 720;
             ControlPts[0].z = 0;
@@ -209,24 +211,27 @@ void Camera::Run(int test) {
             line(WinSlip, Point(ControlPts[0].x, ControlPts[0].y), Point(ControlPtsR[0].x, ControlPtsR[0].y), Scalar(255), 2, LINE_AA);
         }
         cv::cvtColor(ThreshImage, ThreshImage, COLOR_GRAY2BGR); //��ֵ��ͼ��ת��Ϊ3ͨ��
-
         for (int i = 0; i < 12; i++)
         {
             for (int WinRow = 720 - 60 * (i + 1); WinRow < 720 - 60 * (i); WinRow++)
             {
+                
                 CurrRowP = ThreshImage.ptr<uchar>(WinRow);
                 CurrRowP += ((LeftBase - 75) * 3);  //ָ�򴰿�����
+                
                 for (int lWinCol = LeftBase - 75; lWinCol < LeftBase + 75; lWinCol++)
                 {
+                    
                     if (((*CurrRowP) != 0) || ((*(CurrRowP + 1)) != 0) || ((*(CurrRowP + 2)) != 0))
                     {
                         lxPositon += lWinCol;
                         lNum++;
+                        
                     }
                     CurrRowP += 3;
+                    
                 }
-
-
+                
                 CurrRowP = ThreshImage.ptr<uchar>(WinRow) + ((RightBase - 75) * 3);  //ָ�򴰿�����
                 for (int rWinCol = RightBase - 75; rWinCol < RightBase + 75; rWinCol++)
                 {
@@ -291,7 +296,6 @@ void Camera::Run(int test) {
                 line(WinSlip, Point(ControlPts[3].x, ControlPts[3].y), Point(ControlPtsR[3].x, ControlPtsR[3].y), Scalar(255), 2, LINE_AA);
             }
         }
-
         DrawBezier(WinSlip, ControlPts);
         DrawBezier(WinSlip, ControlPtsR);
         //��������
@@ -317,44 +321,49 @@ void Camera::Run(int test) {
         //*/
         FinalDisp = Frame * 0.8 + TempImage * 0.2;
 
-
+        stop1 = high_resolution_clock::now();
+        file << "process: " << double(duration_cast<microseconds>(stop1 - start1).count()) << endl;
+        
         cout<<"Curve: " << Cur << endl;
         //cv::imshow("0", FinalDisp);
         //cv::imshow("Lane Line Detection", FinalDisp);
         //cv::waitKey(1);
+        t--;
+        
     }
-  
+    file.close();
     
     
     
-//    //____________________________________
-//    
-//    
     
-//
+        //____________________________________
+    
+    
+    
+    
     while (times) {
-        start = chrono::system_clock::now();
-        cout << test << endl;
-        car_->test+=1;
-        this_thread::sleep_for(chrono::seconds(1));
-        end = chrono::system_clock::now();
-        cout << chrono::duration_cast<chrono::milliseconds>(end - start).count()
-             << endl;
+//        start = chrono::system_clock::now();
+//        cout << test << endl;
+//        car_->test+=1;
+//        this_thread::sleep_for(chrono::seconds(1));
+//        end = chrono::system_clock::now();
+//        cout << chrono::duration_cast<chrono::milliseconds>(end - start).count()
+//        << endl;
         //test
-        cout << "target_direction: " << car_->target_direction << endl;
+       // cout << "target_direction: " << car_->target_direction << endl;
 
-//        if (car_->target_direction == 2){
-//            car_->target_direction = 1.0;
-//        }
-//        else{
-//            if (car_->target_direction == 1.5){
-//                car_->target_direction = 2.0;
-//            }
-//
-//            if (car_->target_direction == 1){
-//                car_->target_direction = 2.0;
-//            }
-//        }
+        //        if (car_->target_direction == 2){
+        //            car_->target_direction = 1.0;
+        //        }
+        //        else{
+        //            if (car_->target_direction == 1.5){
+        //                car_->target_direction = 2.0;
+        //            }
+        //
+        //            if (car_->target_direction == 1){
+        //                car_->target_direction = 2.0;
+        //            }
+        //        }
     }
 }
 
