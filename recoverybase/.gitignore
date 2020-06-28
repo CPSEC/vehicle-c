@@ -1,0 +1,3 @@
+lib/libpackage/*
+!lib/libpackage/*.tar.gz
+!lib/libpackage/*.zip

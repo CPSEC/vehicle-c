@@ -11,7 +11,7 @@ using namespace std;
 #define DATA_NUMBER 4
 
 // for debug
-#define cout << __FUNCTION__ << endl;
+#define DBG (cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << endl)
 //
 
 enum class PartType : int { camera, servoPID, throttlePID, speed };

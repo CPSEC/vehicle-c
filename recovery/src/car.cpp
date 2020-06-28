@@ -19,12 +19,12 @@
 using namespace std;
 
 Car::Car() {
-    cout << __FUNCTION__ << endl;
+    DBG;
     Init();
 }
 
 void Car::Init() {
-    cout << __FUNCTION__ << endl;
+    DBG;
     InitState();
     AddPart();
     CreateStateDir();
@@ -34,6 +34,7 @@ void Car::Init() {
 
 // init shared memory -- state
 void Car::InitState() {
+    DBG;
     state_ = State::ShareMemoryInit();
     state_->speed_ = 0;
     state_->direction_ = 0;
@@ -52,6 +53,7 @@ void Car::InitState() {
 
 // add all parts
 void Car::AddPart() {
+    DBG;
     part_pid_[PartType::camera] = -1;
     part_pid_[PartType::servoPID] = -1;
     part_pid_[PartType::throttlePID] = -1;
@@ -60,7 +62,7 @@ void Car::AddPart() {
 
 // create part process
 void Car::ForkPart() {
-    cout << __FUNCTION__ << endl;
+    DBG;
     for (pair<PartType, time_t> pr : part_pid_) {
         pid_t pid = fork();
         if (pid < 0) {
@@ -102,6 +104,7 @@ void Car::ForkPart() {
 // run the car manager run loop
 // moniter checkpoint
 void Car::Run() {
+    DBG;
     while (true) {
         for (pair<PartType, pid_t> pr : part_pid_) {
             SaveState(pr.first);
@@ -112,7 +115,7 @@ void Car::Run() {
 
 // create folder to save process state
 void Car::CreateStateDir() {
-    cout << __FUNCTION__ << endl;
+    DBG;
     mkdir("checkpoint", 0777);
     for (pair<PartType, pid_t> pr : part_pid_) {
         string dir = "./checkpoint/" + to_string((int)pr.first);
@@ -124,7 +127,7 @@ void Car::CreateStateDir() {
 
 // dump a part process state according to part type
 void Car::SaveState(PartType part) {
-    cout << __FUNCTION__ << endl;
+    DBG;
     string dir = "./checkpoint/" + to_string((int)part);
     if (criu_init_opts() == -1) cout << "criu init failed" << endl;
     criu_set_pid(part_pid_[part]);
@@ -139,7 +142,7 @@ void Car::SaveState(PartType part) {
 
 // restore a part process state according to part type
 void Car::RestoreState(PartType part) {
-    cout << __FUNCTION__ << endl;
+    DBG;
     string dir = "./checkpoint/" + to_string((int)part);
     if (criu_init_opts() == -1) cout << "criu init failed" << endl;
     int fd = open((char *)dir.c_str(), O_DIRECTORY);
