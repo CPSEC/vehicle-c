@@ -1,14 +1,15 @@
+#include "speed.h"
+
 #include <bits/stdc++.h>
 
 #include <chrono>
 #include <cstdlib>
 #include <iostream>
-using namespace std::chrono;
-#include "as5048a.h"
-using namespace std;
-#include "speed.h"
 
-Speed::Speed() : Part(PartType::speed) {
+using namespace std;
+using namespace std::chrono;
+
+Speed::Speed() : Part(PartType::speed), chalega_kya(As5048a(0, 128)) {
     // initial
     result1 = 0;
     result2 = 0;
@@ -18,7 +19,6 @@ Speed::Speed() : Part(PartType::speed) {
     time_total = 0.0;
     speed = 0.0;
     // clear error
-    As5048a chalega_kya(0, 128);
 }
 
 void Speed::Run() {

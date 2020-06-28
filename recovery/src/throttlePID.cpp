@@ -4,12 +4,13 @@
 
 #include <iostream>
 
-#include "MiniPID.h"
+#include "pca.h"
 using namespace std;
 
-ThrottlePID::ThrottlePID() : Part(PartType::throttlePID) {
-    pid = MiniPID(0.00228677780020377, 0.00277411402751383,
-                  -0.000169192834187225);
+ThrottlePID::ThrottlePID()
+    : Part(PartType::throttlePID),
+      pid(MiniPID(0.00228677780020377, 0.00277411402751383,
+                  -0.000169192834187225)) {
     pid.setOutputLimits(0.0, 1.0);
 }
 

@@ -1,12 +1,10 @@
 #include "pca.h"
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <wiringPi.h>
 
-#include <iostream>
+#include <cstdlib>
 
-#include "pca9685.h"
+#include "../lib/pca9685.h"
 
 #define PIN_BASE 300
 #define MAX_PWM 4096

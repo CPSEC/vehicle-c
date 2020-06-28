@@ -1,9 +1,6 @@
 #ifndef _PART_H
 #define _PART_H
 
-#include <chrono>
-#include <string>
-
 #include "share.h"
 
 class Part {

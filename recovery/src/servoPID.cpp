@@ -1,12 +1,15 @@
 #include "servoPID.h"
 
 #include <iostream>
-using namespace std;
-#include "MiniPID.h"
 
-ServoPID::ServoPID() : Part(PartType::servoPID) {
-    pid = MiniPID(0.00228677780020377, 0.00277411402751383,
-                  -0.000169192834187225);
+#include "pca.h"
+
+using namespace std;
+
+ServoPID::ServoPID()
+    : Part(PartType::servoPID),
+      pid(MiniPID(0.00228677780020377, 0.00277411402751383,
+                  -0.000169192834187225)) {
     pid.setOutputLimits(-1.0, 1.0);
 }
 

@@ -8,7 +8,7 @@
 #include <opencv2/opencv.hpp>
 #include <sstream>
 
-#include "raspicam/src/raspicam_cv.h"
+#include "../lib/raspicam/src/raspicam_cv.h"
 using namespace cv;
 using namespace std;
 

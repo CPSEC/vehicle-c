@@ -45,7 +45,7 @@ void Car::InitState() {
     for (int i = 0; i < PART_NUMBER; ++i) {
         state_->is_new_data[i] = false;
         state_->need_compulsive_checkpoint[i] = false;
-        state_->average_time_with_cycles[i] = 0;
+        state_->average_time_per_cycle[i] = 0;
         state_->last_unit_checkpoint[i] = tv;
     }
 }
@@ -185,7 +185,7 @@ void Car::CheckUnitCheckpoint() {
     gettimeofday(&tv, nullptr);
     for (int i = 0; i < PART_NUMBER; ++i) {
         if (tv.tv_usec - state_->last_unit_checkpoint[i].tv_usec >
-            state_->average_time_with_cycles[i] / 2) {
+            state_->average_time_per_cycle[i] / 2) {
             SaveState((PartType(i)));
             state_->last_unit_checkpoint[i] = tv;
         }

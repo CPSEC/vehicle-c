@@ -15,17 +15,17 @@ void Part::SetCompulsiveCheckpoint() {
 // wait the manager make a checkpoint and set need compulsive to false
 void Part::WaitCompulsiveCheckpoint() {
     while (state_->need_compulsive_checkpoint[(int)part_type_]) {
-        usleep(50);
+        usleep(100);
     }
 }
 
 void Part::UpdateAverageCycleTime(timeval& tv_start, timeval& tv_end) {
     suseconds_t t = tv_end.tv_usec - tv_start.tv_usec;
-    if (state_->average_time_with_cycles[(int)part_type_] == 0) {
-        state_->average_time_with_cycles[(int)part_type_] = t;
+    if (state_->average_time_per_cycle[(int)part_type_] == 0) {
+        state_->average_time_per_cycle[(int)part_type_] = t;
     } else {
-        state_->average_time_with_cycles[(int)part_type_] =
-            (state_->average_time_with_cycles[(int)part_type_] + t) / 2;
+        state_->average_time_per_cycle[(int)part_type_] =
+            (state_->average_time_per_cycle[(int)part_type_] + t) / 2;
     }
 }
 

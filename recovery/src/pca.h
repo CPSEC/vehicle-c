@@ -7,10 +7,10 @@ class Pca {
    public:
     Pca();
     int calcTicks(float impulseMs, int hertz);
-    virtual void setSpeed(float pulse);
-    virtual void setDirect(float pulse);
-    virtual void setRGB(int rv, int gv, int bv);
-    virtual void resetRGB();
+    void setSpeed(float pulse);
+    void setDirect(float pulse);
+    void setRGB(int rv, int gv, int bv);
+    void resetRGB();
     ~Pca();
 };
 

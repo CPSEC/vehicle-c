@@ -1,7 +1,7 @@
 #ifndef _CAMERA_H
 #define _CAMERA_H
 
-#include "../lib/raspicam_cv.h"
+#include "../lib/raspicam/src/raspicam_cv.h"
 #include "image.h"
 #include "part.h"
 

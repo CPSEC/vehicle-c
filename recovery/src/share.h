@@ -3,17 +3,19 @@
 
 #include <sys/time.h>
 
-#include <utility>
-
-#include "pca.h"
+#include <iostream>
 using namespace std;
 
 #define MEM_NAME "shared_memory_name"
-#define HEARTBEAT_INTERVAL 5
-
 #define PART_NUMBER 4
 #define DATA_NUMBER 4
+
+// for debug
+#define cout << __FUNCTION__ << endl;
+//
+
 enum class PartType : int { camera, servoPID, throttlePID, speed };
+class Pca;
 
 class State {
    public:
@@ -29,7 +31,7 @@ class State {
     bool need_compulsive_checkpoint[PART_NUMBER];
 
     // indicate average one cycle time for each part
-    suseconds_t average_time_with_cycles[PART_NUMBER];
+    suseconds_t average_time_per_cycle[PART_NUMBER];
 
     // indicate the last unit(time based) checkpoint time
     timeval last_unit_checkpoint[PART_NUMBER];

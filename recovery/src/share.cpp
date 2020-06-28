@@ -9,6 +9,8 @@
 
 #include <iostream>
 
+#include "pca.h"
+
 State* State::ShareMemoryInit() {
     int fd = shm_open(MEM_NAME, O_CREAT | O_TRUNC | O_RDWR, 0666);
     if (fd < 0) cerr << "shm_open failed" << endl;

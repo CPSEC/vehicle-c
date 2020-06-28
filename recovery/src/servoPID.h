@@ -1,8 +1,7 @@
 #ifndef _SERVOPID_H
 #define _SERVOPID_H
 
-#include "MiniPID.h"
-#include "car.h"
+#include "../lib/MiniPID.h"
 #include "part.h"
 
 class ServoPID : public Part {

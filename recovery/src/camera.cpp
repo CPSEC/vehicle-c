@@ -34,7 +34,7 @@ Camera::Camera() : Part(PartType::camera) {
     // file.open("camera times.txt");
 }
 
-void Camera::Run(int test) {
+void Camera::Run() {
     Capture.read(Frame);
 
     // file << "capture: "

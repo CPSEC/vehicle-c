@@ -1,8 +1,7 @@
 #ifndef _ThrottlePID_H
 #define _ThrottlePID_H
 
-#include "MiniPID.h"
-#include "car.h"
+#include "../lib/MiniPID.h"
 #include "part.h"
 
 class ThrottlePID : public Part {
