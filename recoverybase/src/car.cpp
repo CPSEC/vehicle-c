@@ -32,8 +32,8 @@ void Car::Init() {
     CreateStateDir();
 
     cout << "car " << getpid() << endl;
-    for (int i = 0; i < PART_NUMBER; ++i)
-        cout << "part " << part_pid_[PartType(i)] << endl;
+    // for (int i = 0; i < PART_NUMBER; ++i)
+    //     cout << "part " << part_pid_[PartType(i)] << endl;
 
     cout << "init finished" << endl;
 }
@@ -53,9 +53,13 @@ void Car::InitState() {
     for (int i = 0; i < PART_NUMBER; ++i) {
         state_->is_new_data[i] = false;
         state_->need_compulsive_checkpoint[i] = false;
-        state_->average_time_per_cycle[i] = 0;
+
         state_->last_unit_checkpoint[i] = tv;
     }
+    state_->average_time_per_cycle[0] = avgt0;
+    state_->average_time_per_cycle[1] = avgt1;
+    state_->average_time_per_cycle[2] = avgt2;
+    state_->average_time_per_cycle[3] = avgt3;
 }
 
 // add all parts
@@ -102,6 +106,22 @@ void Car::ForkPart() {
         } else {
             // car
             part_pid_[pr.first] = pid;
+            switch (pr.first) {
+                case PartType::camera:
+                    cout << "camera pid " << pid << endl;
+                    break;
+                case PartType::servoPID:
+                    cout << "servopid pid " << pid << endl;
+                    break;
+                case PartType::throttlePID:
+                    cout << "throttlepid pid " << pid << endl;
+                    break;
+                case PartType::speed:
+                    cout << "speed pid " << pid << endl;
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
@@ -122,7 +142,7 @@ void Car::CreateStateDir() {
 
 // dump a part process state according to part type
 void Car::SaveState(PartType part) {
-    cout << __FUNCTION__ << " " << part_pid_[part] << endl;
+    cout << __FUNCTION__ << " ing " << part_pid_[part] << endl;
     string dir = "./checkpoint/" + to_string(part_pid_[part]);
     // cout << "``````````````````````````" << dir << " " << part_pid_[part]
     // << endl;
@@ -134,8 +154,11 @@ void Car::SaveState(PartType part) {
     criu_set_shell_job(true);
     criu_set_log_file("dump.log");
     criu_set_log_level(4);
-    criu_dump();
-    criu_restore();
+    if (criu_dump() < 0) {
+        cerr << "dump " << part_pid_[part] << " failed" << endl;
+    } else {
+        cout << "dump " << part_pid_[part] << " successfully" << endl;
+    }
     close(fd);
 
     // string dir = "./checkpoint/" + to_string(part_pid_[part]);
@@ -157,7 +180,7 @@ void Car::SaveState(PartType part) {
 
 // restore a part process state according to part type
 void Car::RestoreState(PartType part) {
-    cout << __FUNCTION__ << " " << part_pid_[part] << endl;
+    cout << __FUNCTION__ << " ing " << part_pid_[part] << endl;
     string dir = "./checkpoint/" + to_string(part_pid_[part]);
     // cout << "``````````````````````````" << dir << " " << part_pid_[part]
     // << endl;
@@ -167,7 +190,11 @@ void Car::RestoreState(PartType part) {
     criu_set_shell_job(true);
     criu_set_log_file("resotre.log");
     criu_set_log_level(4);
-    criu_restore();
+    if (criu_restore() < 0) {
+        cerr << "dump " << part_pid_[part] << " failed" << endl;
+    } else {
+        cout << "dump " << part_pid_[part] << " successfully" << endl;
+    }
     close(fd);
 
     // string dir = "./checkpoint/" + to_string(part_pid_[part]);
@@ -217,10 +244,16 @@ void Car::CheckCompulsiveCheckpoint() {
     DBG;
     for (int i = 0; i < PART_NUMBER; ++i) {
         if (state_->need_compulsive_checkpoint[i]) {
-            cout << "SaveState compulsive " << (int)PartType(i) << endl;
-            // suppose a savestate() fucntion cost 1s
-            total_run_time += 1000000;
+            // cout << "SaveState compulsive " << (int)PartType(i) << "-"
+            //      << part_pid_[(PartType)i] << endl;
+            // suppose a savestate() fucntion cost 0.01s
+            timeval t1, t2;
+            gettimeofday(&t1, nullptr);
+#ifdef C
             SaveState((PartType(i)));
+#endif
+            gettimeofday(&t2, nullptr);
+            total_run_time += diffus(t1, t2);
             state_->need_compulsive_checkpoint[i] = false;
         }
     }
@@ -230,12 +263,26 @@ void Car::CheckCompulsiveCheckpoint() {
 void Car::CheckUnitCheckpoint() {
     DBG;
     timeval tv;
+#ifdef C
+    int interval = 2;
+#else
+    int interval = 4;
+#endif
+
     gettimeofday(&tv, nullptr);
     for (int i = 0; i < PART_NUMBER; ++i) {
-        if (tv.tv_usec - state_->last_unit_checkpoint[i].tv_usec >
-            state_->average_time_per_cycle[i] / 3) {
-            cout << "SaveState unit " << (int)PartType(i) << endl;
+        if (diffus(state_->last_unit_checkpoint[i], tv) >
+            state_->average_time_per_cycle[i] / interval) {
+            // cout << "SaveState unit " << (int)PartType(i) << "-"
+            //      << part_pid_[(PartType)i] << endl;
+            // 0.01s
+            // cout << "!!!!!!!!!!!!!!!!!!!!!!!! " << i << " "
+            //      << state_->average_time_per_cycle[i] << endl;
+            timeval t1, t2;
+            gettimeofday(&t1, nullptr);
             SaveState((PartType(i)));
+            gettimeofday(&t2, nullptr);
+            total_run_time += diffus(t1, t2);
             state_->last_unit_checkpoint[i] = tv;
         }
     }
@@ -248,20 +295,24 @@ void Car::Run() {
     timeval t_start, t_end;
     gettimeofday(&t_start, nullptr);
     int last_time = state_->times;
+    cout << "init last_time " << last_time << endl;
     while (true) {
         cout << "\n\n\n=============================== " << state_->times
              << " ===============================" << endl;
-        // CheckCompulsiveCheckpoint();
+        CheckCompulsiveCheckpoint();
         CheckUnitCheckpoint();
-        if (state_->times >= 10) break;
-        if (last_time != state_->times && state_->times % 2 == 0) {
+        if (state_->times >= MAX_TIMES) break;
+        if (last_time && last_time != state_->times &&
+            state_->times % FAULT_STEP == 0) {
+            last_time += FAULT_STEP;
             SimulateFalut(PartType::camera);
+            // usleep(200);
             RestoreState(PartType::camera);
-            last_time = state_->times;
         }
-        sleep(1);
+        usleep(50);
     }
     gettimeofday(&t_end, nullptr);
-    total_run_time += t_end.tv_usec - t_start.tv_usec;
-    cout << "total run time " << total_run_time << " ms" << endl;
+    total_run_time = diffus(t_start, t_end);
+    cout << "total run time " << total_run_time << " us"
+         << " " << (double)total_run_time / 1e6 << " s" << endl;
 }

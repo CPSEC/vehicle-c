@@ -9,6 +9,23 @@
 
 #include <iostream>
 
+suseconds_t diffus(timeval& tv_start, timeval& tv_end) {
+    suseconds_t t1 = 1000000 * tv_start.tv_sec + tv_start.tv_usec;
+    suseconds_t t2 = 1000000 * tv_end.tv_sec + tv_end.tv_usec;
+    return t2 > t1 ? t2 - t1 : t1 - t2;
+}
+
+// 26 = 825
+// 30 = 6374
+// 35 = 66565
+// 37 = 270521
+int costtime(int n) {
+    if (n <= 1)
+        return n;
+    else
+        return costtime(n - 1) + costtime(n + 2);
+}
+
 State* State::ShareMemoryInit() {
     DBG;
     int fd = shm_open(MEM_NAME, O_RDWR, 0666);

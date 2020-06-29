@@ -12,10 +12,20 @@ using namespace std;
 #define DATA_NUMBER 4
 
 // for debug
+#define MAX_TIMES 30
+#define FAULT_STEP 3
+// #define C
+#define avgt0 40000
+#define avgt1 1000
+#define avgt2 1000
+#define avgt3 8000
 #define DBG (cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << endl)
 //
 
 enum class PartType : int { camera, servoPID, throttlePID, speed };
+
+suseconds_t diffus(timeval& tv_start, timeval& tv_end);
+int costtime(int n);
 
 class State {
    public:

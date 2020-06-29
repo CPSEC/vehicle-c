@@ -16,8 +16,18 @@ void Camera::WaitNeededNewData() { return; }
 
 void Camera::Run() {
     DBG;
-    sleep(3);
+    // int i = 80;
+    // while (i--) costtime(26);
+    // int cnt = state_->times;
+    timeval t1, t2;
+    gettimeofday(&t1, nullptr);
+    gettimeofday(&t2, nullptr);
+    while (diffus(t1, t2) < avgt0) {
+        usleep(100);
+        gettimeofday(&t2, nullptr);
+    }
     state_->times += 1;
+    // state_->times = 1 + state_->times > cnt ? state_->times : cnt;
     cout << "Camera add times to " << state_->times << endl;
 }
 
