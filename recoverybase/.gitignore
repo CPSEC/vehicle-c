@@ -1,4 +1,4 @@
 lib/libpackage/*
 !lib/libpackage/*.tar.gz
 !lib/libpackage/*.zip
-!build/run.sh
+!recoverybase/build/run.sh
