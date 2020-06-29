@@ -106,31 +106,6 @@ void Car::ForkPart() {
     }
 }
 
-// run the car manager run loop
-// moniter checkpoint
-void Car::Run() {
-    DBG;
-    timeval t_start, t_end;
-    gettimeofday(&t_start, nullptr);
-    int last_time = state_->times;
-    while (true) {
-        cout << "\n\n\n=============================== " << state_->times
-             << " ===============================" << endl;
-        CheckCompulsiveCheckpoint();
-        CheckUnitCheckpoint();
-        if (state_->times >= 10) return;
-        if (last_time != state_->times && state_->times % 2 == 0) {
-            SimulateFalut(PartType::camera);
-            RestoreState(PartType::camera);
-            last_time = state_->times;
-        }
-        sleep(1);
-    }
-    gettimeofday(&t_end, nullptr);
-    cout << "total run time " << t_end.tv_usec - t_start.tv_usec << " ms"
-         << endl;
-}
-
 // create folder to save process state
 void Car::CreateStateDir() {
     DBG;
@@ -160,6 +135,7 @@ void Car::SaveState(PartType part) {
     criu_set_log_file("dump.log");
     criu_set_log_level(4);
     criu_dump();
+    criu_restore();
     close(fd);
 
     // string dir = "./checkpoint/" + to_string(part_pid_[part]);
@@ -211,7 +187,15 @@ void Car::RestoreState(PartType part) {
 
 // simulate a fault for a part process according to part type
 void Car::SimulateFalut(PartType part) {
-    // // kill simulate attack
+    // kill simulate attack
+    if (kill(part_pid_[part], SIGINT) == -1) {
+        cerr << "kill " << part_pid_[part] << " failed" << endl;
+    } else {
+        int statloc, opt;
+        waitpid(part_pid_[part], &statloc, opt);
+        cout << "kill " << part_pid_[part] << " successfully" << endl;
+    }
+
     // cout << "kill " << (int)part << endl;
     // char pid_buf[16];
     // sprintf(pid_buf, "%d", (int)part_pid_[part]);
@@ -226,11 +210,6 @@ void Car::SimulateFalut(PartType part) {
     //     // parent
     //     wait(0);
     // }
-    if (kill(part_pid_[part], SIGINT) == -1) {
-        cerr << "kill " << part_pid_[part] << " failed" << endl;
-    } else {
-        cout << "kill " << part_pid_[part] << " successfully" << endl;
-    }
 }
 
 // check if any part need a compulsive checkpoint
@@ -239,6 +218,8 @@ void Car::CheckCompulsiveCheckpoint() {
     for (int i = 0; i < PART_NUMBER; ++i) {
         if (state_->need_compulsive_checkpoint[i]) {
             cout << "SaveState compulsive " << (int)PartType(i) << endl;
+            // suppose a savestate() fucntion cost 1s
+            total_run_time += 1000000;
             SaveState((PartType(i)));
             state_->need_compulsive_checkpoint[i] = false;
         }
@@ -252,10 +233,35 @@ void Car::CheckUnitCheckpoint() {
     gettimeofday(&tv, nullptr);
     for (int i = 0; i < PART_NUMBER; ++i) {
         if (tv.tv_usec - state_->last_unit_checkpoint[i].tv_usec >
-            state_->average_time_per_cycle[i] / 2) {
+            state_->average_time_per_cycle[i] / 3) {
             cout << "SaveState unit " << (int)PartType(i) << endl;
             SaveState((PartType(i)));
             state_->last_unit_checkpoint[i] = tv;
         }
     }
+}
+
+// run the car manager run loop
+// moniter checkpoint
+void Car::Run() {
+    DBG;
+    timeval t_start, t_end;
+    gettimeofday(&t_start, nullptr);
+    int last_time = state_->times;
+    while (true) {
+        cout << "\n\n\n=============================== " << state_->times
+             << " ===============================" << endl;
+        // CheckCompulsiveCheckpoint();
+        CheckUnitCheckpoint();
+        if (state_->times >= 10) break;
+        if (last_time != state_->times && state_->times % 2 == 0) {
+            SimulateFalut(PartType::camera);
+            RestoreState(PartType::camera);
+            last_time = state_->times;
+        }
+        sleep(1);
+    }
+    gettimeofday(&t_end, nullptr);
+    total_run_time += t_end.tv_usec - t_start.tv_usec;
+    cout << "total run time " << total_run_time << " ms" << endl;
 }

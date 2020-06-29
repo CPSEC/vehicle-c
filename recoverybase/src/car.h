@@ -14,6 +14,7 @@ class Car {
    public:
     State* state_;
     unordered_map<PartType, pid_t> part_pid_;
+    suseconds_t total_run_time;
     Car();
     void Init();
     void InitState();

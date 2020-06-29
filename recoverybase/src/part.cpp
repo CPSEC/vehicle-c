@@ -17,9 +17,9 @@ void Part::SetCompulsiveCheckpoint() {
 
 // wait the manager make a checkpoint and set need compulsive to false
 void Part::WaitCompulsiveCheckpoint() {
-    while (state_->need_compulsive_checkpoint[(int)part_type_]) {
-        sleep(1);
-    }
+    // while (state_->need_compulsive_checkpoint[(int)part_type_]) {
+    //     sleep(1);
+    // }
 }
 
 void Part::UpdateAverageCycleTime(timeval& tv_start, timeval& tv_end) {
