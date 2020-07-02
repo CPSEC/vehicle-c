@@ -34,6 +34,15 @@ Camera::Camera() : Part(PartType::camera) {
     // file.open("camera times.txt");
 }
 
+void Camera::WaitNeededNewData() { return; }
+
+void Camera::UpdateIsNewData() {
+    // direction_
+    state_->is_new_data[1] = true;
+    // target_speed_
+    state_->is_new_data[2] = true;
+}
+
 void Camera::Run() {
     Capture.read(Frame);
 

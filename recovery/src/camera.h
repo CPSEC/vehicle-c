@@ -41,6 +41,8 @@ class Camera : public Part {
     // ofstream file;
 
     Camera();
+    virtual void WaitNeededNewData() override;
+    virtual void UpdateIsNewData() override;
     void Run() override;
     virtual ~Camera();
 };

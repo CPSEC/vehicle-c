@@ -8,7 +8,7 @@ using namespace std;
 
 #define MEM_NAME "shared_memory_name"
 #define PART_NUMBER 4
-#define DATA_NUMBER 4
+#define DATA_NUMBER 3
 
 // for debug
 #define DBG (cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << endl)
@@ -22,7 +22,6 @@ class State {
     double speed_;
     double direction_;
     double target_speed_;
-    double target_direction_;
 
     // indicate if the 4 variable above is new data or not
     bool is_new_data[DATA_NUMBER];

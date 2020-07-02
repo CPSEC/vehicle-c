@@ -8,6 +8,8 @@ class ThrottlePID : public Part {
    public:
     MiniPID pid;
     ThrottlePID();
+    virtual void WaitNeededNewData() override;
+    virtual void UpdateIsNewData() override;
     void Run() override;
     ~ThrottlePID();
 };

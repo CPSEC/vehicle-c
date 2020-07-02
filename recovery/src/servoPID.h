@@ -8,6 +8,8 @@ class ServoPID : public Part {
    public:
     MiniPID pid;
     ServoPID();
+    virtual void WaitNeededNewData() override;
+    virtual void UpdateIsNewData() override;
     void Run() override;
     ~ServoPID() override;
 };

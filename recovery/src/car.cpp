@@ -39,7 +39,6 @@ void Car::InitState() {
     state_->speed_ = 0;
     state_->direction_ = 0;
     state_->target_speed_ = 0;
-    state_->target_direction_ = 0;
     state_->pca_ = new Pca();
     timeval tv;
     gettimeofday(&tv, nullptr);

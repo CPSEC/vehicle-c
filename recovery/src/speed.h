@@ -14,8 +14,10 @@ class Speed : public Part {
     double time_total;
     double speed;
     As5048a chalega_kya;
-
+    
     Speed();
+    virtual void WaitNeededNewData() override;
+    virtual void UpdateIsNewData() override;
     void Run() override;
     ~Speed();
 };
