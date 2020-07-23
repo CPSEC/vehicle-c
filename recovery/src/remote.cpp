@@ -70,25 +70,16 @@ void Remote::Run() {
         write(sockfd, buff, sizeof(buff));
         bzero(buff, sizeof(buff));
         read(sockfd, buff, sizeof(buff));
-        //////////make use of the data here.
-        
-        
-//        const auto rawJsonLength = static_cast<int>(buff.length());
-        
-        //JSONCPP_STRING err;
+
+        //create json reader
         Json::Reader reader;
+        //value saved in root
         Json::Value root;
         
+        //read from buff and save it in root
         reader.parse(buff, root);
-
-//          Json::CharReaderBuilder builder;
-//          const unique_ptr<Json::CharReader> reader(builder.newCharReader());
-//          if (!reader->parse(buff.c_str(), buff.c_str() + rawJsonLength, &root,
-//                             &err)) {
-//            cout << "error" << endl;
-//            return EXIT_FAILURE;
-//          }
         
+        //cast results into desired type
         state_->auto_ = root["auto"].asBool();
         state_->direction_ = root["servo"].asDouble();
         bool forward = root["forward"].asBool();
