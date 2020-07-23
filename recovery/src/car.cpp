@@ -9,12 +9,13 @@
 #include <iostream>
 
 #include "camera.h"
-#include "criu.h"
+//#include "criu.h"
 #include "part.h"
 #include "pca.h"
 #include "servoPID.h"
 #include "speed.h"
 #include "throttlePID.h"
+#include "remote.h"
 
 using namespace std;
 
@@ -57,6 +58,7 @@ void Car::AddPart() {
     part_pid_[PartType::servoPID] = -1;
     part_pid_[PartType::throttlePID] = -1;
     part_pid_[PartType::speed] = -1;
+    part_pid_[PartType::remote] = -1;
 }
 
 // create part process
@@ -82,6 +84,9 @@ void Car::ForkPart() {
                 case PartType::speed:
                     part = new Speed();
                     break;
+                case PartType::remote:
+                    part = new Remote();
+                    break;
                 default:
                     break;
             }
@@ -106,7 +111,7 @@ void Car::Run() {
     DBG;
     while (true) {
         for (pair<PartType, pid_t> pr : part_pid_) {
-            SaveState(pr.first);
+            //SaveState(pr.first);
         }
         sleep(1);
     }
@@ -125,71 +130,71 @@ void Car::CreateStateDir() {
 }
 
 // dump a part process state according to part type
-void Car::SaveState(PartType part) {
-    DBG;
-    string dir = "./checkpoint/" + to_string((int)part);
-    if (criu_init_opts() == -1) cout << "criu init failed" << endl;
-    criu_set_pid(part_pid_[part]);
-    int fd = open((char *)dir.c_str(), O_DIRECTORY);
-    criu_set_images_dir_fd(fd);
-    criu_set_leave_running(true);
-    criu_set_shell_job(true);
-    criu_set_log_file("dump.log");
-    criu_set_log_level(4);
-    criu_dump();
-}
+//void Car::SaveState(PartType part) {
+//    DBG;
+//    string dir = "./checkpoint/" + to_string((int)part);
+//    if (criu_init_opts() == -1) cout << "criu init failed" << endl;
+//    criu_set_pid(part_pid_[part]);
+//    int fd = open((char *)dir.c_str(), O_DIRECTORY);
+//    criu_set_images_dir_fd(fd);
+//    criu_set_leave_running(true);
+//    criu_set_shell_job(true);
+//    criu_set_log_file("dump.log");
+//    criu_set_log_level(4);
+//    criu_dump();
+//}
 
 // restore a part process state according to part type
-void Car::RestoreState(PartType part) {
-    DBG;
-    string dir = "./checkpoint/" + to_string((int)part);
-    if (criu_init_opts() == -1) cout << "criu init failed" << endl;
-    int fd = open((char *)dir.c_str(), O_DIRECTORY);
-    criu_set_images_dir_fd(fd);
-    criu_set_shell_job(true);
-    criu_set_log_file("resotre.log");
-    criu_set_log_level(4);
-    criu_restore();
-}
+//void Car::RestoreState(PartType part) {
+//    DBG;
+//    string dir = "./checkpoint/" + to_string((int)part);
+//    if (criu_init_opts() == -1) cout << "criu init failed" << endl;
+//    int fd = open((char *)dir.c_str(), O_DIRECTORY);
+//    criu_set_images_dir_fd(fd);
+//    criu_set_shell_job(true);
+//    criu_set_log_file("resotre.log");
+//    criu_set_log_level(4);
+//    criu_restore();
+//}
 
 // simulate a fault for a part process according to part type
-void Car::SimulateFalut(PartType part) {
-    // kill simulate attack
-    cout << "kill " << (int)part << endl;
-    char pid_buf[16];
-    sprintf(pid_buf, "%d", (int)part_pid_[part]);
-    char *cmd[] = {"sudo", "kill", "-s", "2", pid_buf, NULL};
-    pid_t p = fork();
-    if (p < 0) {
-        cerr << "kill failed" << endl;
-    } else if (p == 0) {
-        // child
-        execvp("sudo", cmd);
-    } else {
-        // parent
-        wait(0);
-    }
-}
+//void Car::SimulateFalut(PartType part) {
+//    // kill simulate attack
+//    cout << "kill " << (int)part << endl;
+//    char pid_buf[16];
+//    sprintf(pid_buf, "%d", (int)part_pid_[part]);
+//    char *cmd[] = {"sudo", "kill", "-s", "2", pid_buf, NULL};
+//    pid_t p = fork();
+//    if (p < 0) {
+//        cerr << "kill failed" << endl;
+//    } else if (p == 0) {
+//        // child
+//        execvp("sudo", cmd);
+//    } else {
+//        // parent
+//        wait(0);
+//    }
+//}
 
 // check if any part need a compulsive checkpoint
-void Car::CheckCompulsiveCheckpoint() {
-    for (int i = 0; i < PART_NUMBER; ++i) {
-        if (state_->need_compulsive_checkpoint[i]) {
-            SaveState((PartType(i)));
-            state_->need_compulsive_checkpoint[i] = false;
-        }
-    }
-}
+//void Car::CheckCompulsiveCheckpoint() {
+//    for (int i = 0; i < PART_NUMBER; ++i) {
+//        if (state_->need_compulsive_checkpoint[i]) {
+//            SaveState((PartType(i)));
+//            state_->need_compulsive_checkpoint[i] = false;
+//        }
+//    }
+//}
 
 // check if any part need a unit checkpoint
-void Car::CheckUnitCheckpoint() {
-    timeval tv;
-    gettimeofday(&tv, nullptr);
-    for (int i = 0; i < PART_NUMBER; ++i) {
-        if (tv.tv_usec - state_->last_unit_checkpoint[i].tv_usec >
-            state_->average_time_per_cycle[i] / 2) {
-            SaveState((PartType(i)));
-            state_->last_unit_checkpoint[i] = tv;
-        }
-    }
-}
+//void Car::CheckUnitCheckpoint() {
+//    timeval tv;
+//    gettimeofday(&tv, nullptr);
+//    for (int i = 0; i < PART_NUMBER; ++i) {
+//        if (tv.tv_usec - state_->last_unit_checkpoint[i].tv_usec >
+//            state_->average_time_per_cycle[i] / 2) {
+//            SaveState((PartType(i)));
+//            state_->last_unit_checkpoint[i] = tv;
+//        }
+//    }
+//}

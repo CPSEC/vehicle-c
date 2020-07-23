@@ -1,6 +1,7 @@
 #include "servoPID.h"
 
 #include <iostream>
+#include <unistd.h>
 
 #include "pca.h"
 
@@ -18,13 +19,20 @@ void ServoPID::WaitNeededNewData() {
     while (state_->is_new_data[1] == false) {
         usleep(50);
     }
-    state_->is_new_data[1] = false;
+    if(state_->is_new_data[3]){
+        state_->is_new_data[1] = false;
+    }
+    return;
+}
+void ServoPID::UpdateIsNewData() {
     return;
 }
 
-void ServoPID::UpdateIsNewData() { return; }
-
 void ServoPID::Run() {
+    if(state_->is_new_data[4]){
+        pid.setPID(state_->servoPID_[0],state_->servoPID_[1],state_->servoPID_[2]);
+        state_->is_new_data[4] = false;
+    }
     double output =
         pid.getOutput(state_->direction_, 0);
     state_->pca_->setDirect(output / 2 + 1.5);

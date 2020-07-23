@@ -22,11 +22,11 @@ class Car {
     void ForkPart();
     void Run();
 
-    void SaveState(PartType part);
-    void RestoreState(PartType part);
-    void SimulateFalut(PartType part);
-    void CheckCompulsiveCheckpoint();
-    void CheckUnitCheckpoint();
+//    void SaveState(PartType part);
+//    void RestoreState(PartType part);
+//    void SimulateFalut(PartType part);
+//    void CheckCompulsiveCheckpoint();
+//    void CheckUnitCheckpoint();
 };
 
 #endif

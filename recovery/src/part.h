@@ -3,6 +3,7 @@
 
 #include "share.h"
 
+
 class Part {
    public:
     PartType part_type_;

@@ -1,8 +1,6 @@
 #ifndef _PCA_H
 #define _PCA_H
 
-#include "part.h"
-
 class Pca {
    public:
     Pca();

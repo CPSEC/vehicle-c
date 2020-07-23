@@ -5,6 +5,7 @@
 #include <chrono>
 #include <cstdlib>
 #include <iostream>
+#include "share.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -21,10 +22,10 @@ Speed::Speed() : Part(PartType::speed), chalega_kya(As5048a(0, 128)) {
     // clear error
 }
 
-void ThrottlePID::WaitNeededNewData() {
+void Speed::WaitNeededNewData() {
     return;
 }
-void ThrottlePID::UpdateIsNewData() {
+void Speed::UpdateIsNewData() {
     state_->is_new_data[0] = true;
     return;
 }
