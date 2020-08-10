@@ -9,6 +9,7 @@ echo -e "\n\n\n" >>log.txt
 sudo rm -rf ./checkpoint
 
 #make clean
+cmake ..
 make >>log.txt 2>&1
 echo -e "\n\n\n" >>log.txt
 
