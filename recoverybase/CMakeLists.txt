@@ -14,6 +14,7 @@ aux_source_directory(./src DIR_SRC)
 
 add_executable(recovery ${DIR_SRC})
 
-target_link_libraries(recovery libcriu.so 
+target_link_libraries(recovery 
+                                /usr/local/lib64/libcriu.so
                                 rt
                                 )

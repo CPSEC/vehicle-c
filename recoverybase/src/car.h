@@ -25,7 +25,8 @@ class Car {
 
     void SaveState(PartType part);
     void RestoreState(PartType part);
-    void SimulateFalut(PartType part);
+    // void SimulateFalut(PartType part);
+    void SimulateFalut();
     void CheckCompulsiveCheckpoint();
     void CheckUnitCheckpoint();
 };

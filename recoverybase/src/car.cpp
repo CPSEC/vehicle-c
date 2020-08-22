@@ -28,8 +28,8 @@ void Car::Init() {
     InitState();
 
     AddPart();
-    ForkPart();
-    CreateStateDir();
+    // ForkPart();
+    // CreateStateDir();
 
     cout << "car " << getpid() << endl;
     // for (int i = 0; i < PART_NUMBER; ++i)
@@ -48,33 +48,34 @@ void Car::InitState() {
     state_->direction_ = 0;
     state_->target_speed_ = 0;
     state_->target_direction_ = 0;
-    timeval tv;
-    gettimeofday(&tv, nullptr);
-    for (int i = 0; i < PART_NUMBER; ++i) {
-        state_->is_new_data[i] = false;
-        state_->need_compulsive_checkpoint[i] = false;
 
-        state_->last_unit_checkpoint[i] = tv;
-    }
+    state_->is_new_data[0] = false;
+    state_->is_new_data[1] = false;
+    state_->is_new_data[2] = false;
+
+    state_->need_compulsive_checkpoint[0] = false;
+    state_->need_compulsive_checkpoint[1] = false;
+    state_->need_compulsive_checkpoint[2] = false;
+
     state_->average_time_per_cycle[0] = avgt0;
     state_->average_time_per_cycle[1] = avgt1;
     state_->average_time_per_cycle[2] = avgt2;
-    state_->average_time_per_cycle[3] = avgt3;
+    // state_->average_time_per_cycle[3] = avgt3;
 }
 
 // add all parts
 void Car::AddPart() {
     DBG;
     part_pid_[PartType::camera] = -1;
-    part_pid_[PartType::servoPID] = -1;
-    part_pid_[PartType::throttlePID] = -1;
     part_pid_[PartType::speed] = -1;
+    part_pid_[PartType::servoPID] = -1;
+    // part_pid_[PartType::throttlePID] = -1;
 }
 
 // create part process
 void Car::ForkPart() {
     cout << __FUNCTION__ << endl;
-    for (pair<PartType, time_t> pr : part_pid_) {
+    for (pair<PartType, pid_t> pr : part_pid_) {
         pid_t pid = fork();
         if (pid < 0) {
             cerr << "part fork err" << endl;
@@ -85,23 +86,25 @@ void Car::ForkPart() {
                 case PartType::camera:
                     part = new Camera();
                     break;
-                case PartType::servoPID:
-                    part = new ServoPID();
-                    break;
-                case PartType::throttlePID:
-                    part = new ThrottlePID();
-                    break;
                 case PartType::speed:
                     part = new Speed();
                     break;
+                case PartType::servoPID:
+                    part = new ServoPID();
+                    break;
+                    // case PartType::throttlePID:
+                    //     part = new ThrottlePID();
+                    //     break;
+
                 default:
                     break;
             }
             if (part == nullptr) {
                 cerr << "fork part err" << endl;
             } else {
-                part->RunALL();
                 cout << "start part" << (int)pr.first << endl;
+
+                part->RunALL();
             }
         } else {
             // car
@@ -113,9 +116,9 @@ void Car::ForkPart() {
                 case PartType::servoPID:
                     cout << "servopid pid " << pid << endl;
                     break;
-                case PartType::throttlePID:
-                    cout << "throttlepid pid " << pid << endl;
-                    break;
+                // case PartType::throttlePID:
+                //     cout << "throttlepid pid " << pid << endl;
+                //     break;
                 case PartType::speed:
                     cout << "speed pid " << pid << endl;
                     break;
@@ -190,10 +193,17 @@ void Car::RestoreState(PartType part) {
     criu_set_shell_job(true);
     criu_set_log_file("resotre.log");
     criu_set_log_level(4);
-    if (criu_restore() < 0) {
-        cerr << "dump " << part_pid_[part] << " failed" << endl;
+
+    int count = 0;
+    while (criu_restore() < 0 && count < 10) {
+        cerr << "restore " << part_pid_[part] << " failed... retry... "
+             << count++ << endl;
+    }
+    if (count < 10) {
+        cout << "restore " << part_pid_[part] << " successfully" << endl;
     } else {
-        cout << "dump " << part_pid_[part] << " successfully" << endl;
+        cerr << "restore " << part_pid_[part] << " failed... " << endl;
+        exit(0);
     }
     close(fd);
 
@@ -213,15 +223,31 @@ void Car::RestoreState(PartType part) {
 }
 
 // simulate a fault for a part process according to part type
-void Car::SimulateFalut(PartType part) {
+void Car::SimulateFalut() {
     // kill simulate attack
-    if (kill(part_pid_[part], SIGINT) == -1) {
-        cerr << "kill " << part_pid_[part] << " failed" << endl;
-    } else {
-        int statloc, opt;
-        waitpid(part_pid_[part], &statloc, opt);
-        cout << "kill " << part_pid_[part] << " successfully" << endl;
+
+    // int rkill = kill(part_pid_[PartType::servoPID], SIGINT);
+    // if (rkill == -1) {
+    //     cerr << "kill " << part_pid_[PartType::servoPID] << " failed" <<
+    //     endl;
+    // } else {
+    //     int statloc, opt = 0;
+    //     waitpid(part_pid_[PartType::servoPID], &statloc, opt);
+    //     cout << "kill " << part_pid_[PartType::servoPID] << " successfully"
+    //          << endl;
+    // }
+
+    for (pair<PartType, pid_t> pr : part_pid_) {
+        int rkill = kill(pr.second, SIGINT);
+        if (rkill == -1) {
+            cerr << "kill " << pr.second << " failed" << endl;
+        } else {
+            int statloc, opt = 0;
+            waitpid(pr.second, &statloc, opt);
+            cout << "kill " << pr.second << " successfully" << endl;
+        }
     }
+    // sleep(10);
 
     // cout << "kill " << (int)part << endl;
     // char pid_buf[16];
@@ -247,13 +273,28 @@ void Car::CheckCompulsiveCheckpoint() {
             // cout << "SaveState compulsive " << (int)PartType(i) << "-"
             //      << part_pid_[(PartType)i] << endl;
             // suppose a savestate() fucntion cost 0.01s
-            timeval t1, t2;
-            gettimeofday(&t1, nullptr);
-#ifdef C
-            SaveState((PartType(i)));
-#endif
-            gettimeofday(&t2, nullptr);
-            total_run_time += diffus(t1, t2);
+            // timeval t1, t2;
+            // gettimeofday(&t1, nullptr);
+
+            // 1 only unit, 2 only compulsive, 3 both
+            switch (METHOD) {
+                case 1:
+                    // SaveState((PartType(i)));
+                    // gettimeofday(&t2, nullptr);
+                    // total_run_time += diffus(t1, t2);
+                    break;
+                case 2:
+                    SaveState((PartType(i)));
+                    // gettimeofday(&t2, nullptr);
+                    // total_run_time += diffus(t1, t2);
+                    break;
+                case 3:
+                    SaveState((PartType(i)));
+                    // gettimeofday(&t2, nullptr);
+                    // total_run_time += diffus(t1, t2);
+                    break;
+            }
+
             state_->need_compulsive_checkpoint[i] = false;
         }
     }
@@ -263,26 +304,44 @@ void Car::CheckCompulsiveCheckpoint() {
 void Car::CheckUnitCheckpoint() {
     DBG;
     timeval tv;
-#ifdef C
-    int interval = 2;
-#else
-    int interval = 4;
-#endif
+    // #ifdef C
+    //     int interval = 2;
+    // #else
+    //     int interval = 4;
+    // #endif
+    // int interval = 2;
 
     gettimeofday(&tv, nullptr);
     for (int i = 0; i < PART_NUMBER; ++i) {
         if (diffus(state_->last_unit_checkpoint[i], tv) >
-            state_->average_time_per_cycle[i] / interval) {
+            state_->average_time_per_cycle[i] / INTERVAL) {
             // cout << "SaveState unit " << (int)PartType(i) << "-"
             //      << part_pid_[(PartType)i] << endl;
             // 0.01s
             // cout << "!!!!!!!!!!!!!!!!!!!!!!!! " << i << " "
             //      << state_->average_time_per_cycle[i] << endl;
-            timeval t1, t2;
-            gettimeofday(&t1, nullptr);
-            SaveState((PartType(i)));
-            gettimeofday(&t2, nullptr);
-            total_run_time += diffus(t1, t2);
+            // timeval t1, t2;
+            // gettimeofday(&t1, nullptr);
+
+            // 1 only unit, 2 only compulsive, 3 both
+            switch (METHOD) {
+                case 1:
+                    SaveState((PartType(i)));
+                    // gettimeofday(&t2, nullptr);
+                    // total_run_time += diffus(t1, t2);
+                    break;
+                case 2:
+                    //  gettimeofday(&t2, nullptr);
+                    // gettimeofday(&t2, nullptr);
+                    // total_run_time += diffus(t1, t2);
+                    break;
+                case 3:
+                    SaveState((PartType(i)));
+                    // gettimeofday(&t2, nullptr);
+                    // total_run_time += diffus(t1, t2);
+                    break;
+            }
+
             state_->last_unit_checkpoint[i] = tv;
         }
     }
@@ -292,24 +351,50 @@ void Car::CheckUnitCheckpoint() {
 // moniter checkpoint
 void Car::Run() {
     DBG;
+
+    timeval tv;
+    gettimeofday(&tv, nullptr);
+
+    ForkPart();
+    CreateStateDir();
+
+    for (int i = 0; i < PART_NUMBER; ++i) {
+        state_->is_new_data[i] = false;
+        state_->need_compulsive_checkpoint[i] = false;
+
+        state_->last_unit_checkpoint[i] = tv;
+    }
+
     timeval t_start, t_end;
     gettimeofday(&t_start, nullptr);
     int last_time = state_->times;
     cout << "init last_time " << last_time << endl;
-    while (true) {
-        cout << "\n\n\n=============================== " << state_->times
-             << " ===============================" << endl;
-        CheckCompulsiveCheckpoint();
+
+    bool faluted = FAULTED;
+    while (state_->times <= MAX_TIMES) {
+        // cout << "\n\n\n=============================== " << state_->times
+        //      << " ===============================" << endl;
+
         CheckUnitCheckpoint();
-        if (state_->times >= MAX_TIMES) break;
-        if (last_time && last_time != state_->times &&
-            state_->times % FAULT_STEP == 0) {
-            last_time += FAULT_STEP;
-            SimulateFalut(PartType::camera);
-            // usleep(200);
+        CheckCompulsiveCheckpoint();
+
+        // if (state_->times >= MAX_TIMES) break;
+
+        // last_time = state_->times;
+        // if (last_time && last_time != state_->times &&
+        //     state_->times > FAULT_STEP && !faluted) {
+        if (state_->times > FAULT_STEP && faluted == false) {
+            faluted = true;
+            // SimulateFalut(PartType::servoPID);
+            SimulateFalut();
+
             RestoreState(PartType::camera);
+            RestoreState(PartType::speed);
+            RestoreState(PartType::servoPID);
+
+            // RestoreState(PartType::throttlePID);
         }
-        usleep(50);
+        // usleep(10);
     }
     gettimeofday(&t_end, nullptr);
     total_run_time = diffus(t_start, t_end);

@@ -8,24 +8,34 @@
 using namespace std;
 
 #define MEM_NAME "shared_memory_name"
-#define PART_NUMBER 4
-#define DATA_NUMBER 4
+#define PART_NUMBER 3  // 4
+#define DATA_NUMBER 3  // 4
 
 // for debug
+
+// 1 only unit, 2 only compulsive, 3 both
+#define METHOD 2
+
+// true without falut, false with one falut
+#define FAULTED true
+#define INTERVAL 2
+
 #define MAX_TIMES 30
-#define FAULT_STEP 3
-// #define C
-#define avgt0 40000
-#define avgt1 1000
-#define avgt2 1000
-#define avgt3 8000
-#define DBG (cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << endl)
+#define FAULT_STEP 5
+
+#define avgt0 0
+#define avgt1 0
+#define avgt2 0
+// #define avgt3 0
+
+#define DBG ;
+//(cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << endl)
 //
 
-enum class PartType : int { camera, servoPID, throttlePID, speed };
+enum class PartType : int { camera, speed, servoPID, throttlePID };
 
 suseconds_t diffus(timeval& tv_start, timeval& tv_end);
-int costtime(int n);
+void costtime(int n = 2048);
 
 class State {
    public:
