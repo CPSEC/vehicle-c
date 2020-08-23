@@ -42,6 +42,7 @@ public:
     Pca* pca_;
     
     
+    
     // indicate if the 4 variable above is new data or not
     bool is_new_data[DATA_NUMBER];
     
@@ -52,7 +53,7 @@ public:
     suseconds_t average_time_per_cycle[PART_NUMBER];
     
     // indicate the last unit(time based) checkpoint time
-    timeval last_unit_checkpoint[PART_NUMBER];
+    //timeval last_unit_checkpoint[PART_NUMBER];
     
     static State* ShareMemoryInit();
     static State* ShareMemoryInitCar();
