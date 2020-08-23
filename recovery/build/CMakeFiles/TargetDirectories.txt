@@ -1,0 +1,3 @@
+/home/pi/vc/vehicle-c/recovery/build/CMakeFiles/rebuild_cache.dir
+/home/pi/vc/vehicle-c/recovery/build/CMakeFiles/recovery.dir
+/home/pi/vc/vehicle-c/recovery/build/CMakeFiles/edit_cache.dir
