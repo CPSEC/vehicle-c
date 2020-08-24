@@ -398,6 +398,7 @@ void Car::Run() {
     }
     gettimeofday(&t_end, nullptr);
     total_run_time = diffus(t_start, t_end);
+    total_run_time *= MAX_TIMES * 1.0 / state_->times;
     cout << "total run time " << total_run_time << " us"
          << " " << (double)total_run_time / 1e6 << " s" << endl;
 }

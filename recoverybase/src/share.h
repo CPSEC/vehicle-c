@@ -14,7 +14,7 @@ using namespace std;
 // for debug
 
 // 1 only unit, 2 only compulsive, 3 both
-#define METHOD 2
+#define METHOD 1
 
 // true without falut, false with one falut
 #define FAULTED true

@@ -18,7 +18,7 @@ void Part::SetCompulsiveCheckpoint() {
 // wait the manager make a checkpoint and set need compulsive to false
 void Part::WaitCompulsiveCheckpoint() {
     while (state_->need_compulsive_checkpoint[(int)part_type_]) {
-        usleep(10);
+        // usleep(10);
     }
 }
 
@@ -67,65 +67,53 @@ void Part::RunALL() {
 
         switch (this->part_type_) {
             case PartType::camera:
-                Run();
-                WaitCompulsiveCheckpoint();
-
-                UpdateIsNewData();
-
-                SetCompulsiveCheckpoint();
-                // WaitCompulsiveCheckpoint();
-
                 WaitNeededNewData();
 
                 Run();
+                UpdateIsNewData();
+                SetCompulsiveCheckpoint();
                 WaitCompulsiveCheckpoint();
+
                 Run();
+                SetCompulsiveCheckpoint();
                 WaitCompulsiveCheckpoint();
+
                 Run();
+                SetCompulsiveCheckpoint();
                 WaitCompulsiveCheckpoint();
-                gettimeofday(&tv_end, nullptr);
-                UpdateAverageCycleTime(tv_start, tv_end);
+
                 break;
             case PartType::speed:
                 Run();
-                WaitCompulsiveCheckpoint();
-                Run();
-                WaitCompulsiveCheckpoint();
-
-                UpdateIsNewData();
-
                 SetCompulsiveCheckpoint();
-                // WaitCompulsiveCheckpoint();
+                WaitCompulsiveCheckpoint();
 
                 WaitNeededNewData();
+                Run();
+                UpdateIsNewData();
+                SetCompulsiveCheckpoint();
+                WaitCompulsiveCheckpoint();
 
                 Run();
+                SetCompulsiveCheckpoint();
                 WaitCompulsiveCheckpoint();
-                Run();
-                WaitCompulsiveCheckpoint();
-                gettimeofday(&tv_end, nullptr);
-                UpdateAverageCycleTime(tv_start, tv_end);
+
                 break;
             case PartType::servoPID:
                 Run();
-                WaitCompulsiveCheckpoint();
-                Run();
-                WaitCompulsiveCheckpoint();
-                Run();
-                WaitCompulsiveCheckpoint();
-
-                UpdateIsNewData();
-
                 SetCompulsiveCheckpoint();
-                // WaitCompulsiveCheckpoint();
+                WaitCompulsiveCheckpoint();
+
+                Run();
+                SetCompulsiveCheckpoint();
+                WaitCompulsiveCheckpoint();
 
                 WaitNeededNewData();
-
                 Run();
+                UpdateIsNewData();
+                SetCompulsiveCheckpoint();
                 WaitCompulsiveCheckpoint();
 
-                gettimeofday(&tv_end, nullptr);
-                UpdateAverageCycleTime(tv_start, tv_end);
                 break;
             // case PartType::throttlePID:
             //     Run();
@@ -160,6 +148,9 @@ void Part::RunALL() {
         // Run();
         // gettimeofday(&tv_end, nullptr);
         // UpdateAverageCycleTime(tv_start, tv_end);
+
+        gettimeofday(&tv_end, nullptr);
+        UpdateAverageCycleTime(tv_start, tv_end);
 
         if (state_->times > MAX_TIMES) exit(0);
     }
