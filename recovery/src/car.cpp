@@ -36,18 +36,19 @@ void Car::Init() {
 // init shared memory -- state
 void Car::InitState() {
     DBG;
-    state_ = State::ShareMemoryInit();
-    state_->speed_ = 0;
+    state_ = State::ShareMemoryInitCar();
+    state_->speed_ = 0.0;
     state_->direction_ = 0;
     state_->target_speed_ = 0;
     state_->pca_ = new Pca();
-    timeval tv;
-    gettimeofday(&tv, nullptr);
+
+    //timeval tv;
+    //gettimeofday(&tv, nullptr);
     for (int i = 0; i < PART_NUMBER; ++i) {
         state_->is_new_data[i] = false;
         state_->need_compulsive_checkpoint[i] = false;
         state_->average_time_per_cycle[i] = 0;
-        state_->last_unit_checkpoint[i] = tv;
+        //state_->last_unit_checkpoint[i] = tv;
     }
 }
 
