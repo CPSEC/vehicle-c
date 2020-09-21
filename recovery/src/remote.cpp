@@ -124,7 +124,7 @@ void Remote::Run() {
                 if(FD_ISSET(sockfd, &wfds)){
                     cur = system_clock::now().time_since_epoch();
                     //cout << "W-isset" << endl;
-                    bzero(buff, sizeof(buff));
+                    //bzero(buff, sizeof(buff));
                     //greather data
                     
                     if(cur >= nxt){ // cur later then nxt
@@ -137,16 +137,19 @@ void Remote::Run() {
                         //cout<< s_dict << endl;
                         //cout<< dict << endl;
                         
-                        memset(buff, 0, sizeof(buff));
-                        
                         // output Json
                         Json::FastWriter fastWriter;
                         string output = fastWriter.write(dict);
                         output = output.substr(0,output.size()-1)+ sep; // strip '\n'
-                        strcpy(buff, output.c_str());
+                        
+                        char wbuff[output.size()]; //buffer to be sent
+                        memset(wbuff, 0, sizeof(wbuff)); //initialize
+                        strcpy(wbuff, output.c_str()); //copy output to buffer
+                        
+                        //cout<<output<<endl;
                         
                         // write to socket
-                        write(sockfd, buff, sizeof(buff));
+                        write(sockfd, wbuff, sizeof(wbuff));
                         
                         nxt = nxt + t20mils;
                         count += 1;
