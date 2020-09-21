@@ -53,6 +53,10 @@ void Car::InitState() {
     state_->is_new_data[1] = false;
     state_->is_new_data[2] = false;
 
+    state_->stage[0] = 1;
+    state_->stage[1] = 1;
+    state_->stage[2] = 1;
+
     state_->need_compulsive_checkpoint[0] = false;
     state_->need_compulsive_checkpoint[1] = false;
     state_->need_compulsive_checkpoint[2] = false;
@@ -284,12 +288,12 @@ void Car::CheckCompulsiveCheckpoint() {
                     // total_run_time += diffus(t1, t2);
                     break;
                 case 2:
-                    SaveState((PartType(i)));
+                    if (state_->stage[i] == i) SaveState((PartType(i)));
                     // gettimeofday(&t2, nullptr);
                     // total_run_time += diffus(t1, t2);
                     break;
                 case 3:
-                    SaveState((PartType(i)));
+                    if (state_->stage[i] == i) SaveState((PartType(i)));
                     // gettimeofday(&t2, nullptr);
                     // total_run_time += diffus(t1, t2);
                     break;
@@ -326,7 +330,7 @@ void Car::CheckUnitCheckpoint() {
             // 1 only unit, 2 only compulsive, 3 both
             switch (METHOD) {
                 case 1:
-                    SaveState((PartType(i)));
+                    if (state_->stage[i] == i) SaveState((PartType(i)));
                     // gettimeofday(&t2, nullptr);
                     // total_run_time += diffus(t1, t2);
                     break;
@@ -336,7 +340,7 @@ void Car::CheckUnitCheckpoint() {
                     // total_run_time += diffus(t1, t2);
                     break;
                 case 3:
-                    SaveState((PartType(i)));
+                    if (state_->stage[i] == i) SaveState((PartType(i)));
                     // gettimeofday(&t2, nullptr);
                     // total_run_time += diffus(t1, t2);
                     break;
@@ -383,10 +387,13 @@ void Car::Run() {
         // last_time = state_->times;
         // if (last_time && last_time != state_->times &&
         //     state_->times > FAULT_STEP && !faluted) {
-        if (state_->times > FAULT_STEP && faluted == false) {
+        if (state_->stage[2] == 2 && state_->times > FAULT_STEP &&
+            faluted == false) {
             faluted = true;
             // SimulateFalut(PartType::servoPID);
             SimulateFalut();
+            for (int i = 0; i < PART_NUMBER; ++i)
+                state_->is_new_data[i] = false;
 
             RestoreState(PartType::camera);
             RestoreState(PartType::speed);

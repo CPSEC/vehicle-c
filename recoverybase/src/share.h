@@ -17,7 +17,7 @@ using namespace std;
 #define METHOD 1
 
 // true without falut, false with one falut
-#define FAULTED true
+#define FAULTED false
 #define INTERVAL 2
 
 #define MAX_TIMES 30
@@ -49,6 +49,8 @@ class State {
 
     // indicate if the 4 variable above is new data or not
     bool is_new_data[DATA_NUMBER];
+
+    bool stage[DATA_NUMBER];
 
     // indicate if the corresponding part need a compulsive checkpoint
     bool need_compulsive_checkpoint[PART_NUMBER];

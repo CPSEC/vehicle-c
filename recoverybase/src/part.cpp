@@ -8,6 +8,7 @@
 Part::Part(PartType parttype) {
     part_type_ = parttype;
     state_ = State::ShareMemoryInit();
+    stage = 0;
 }
 
 // set this part need a compulsive checkpoint
@@ -148,7 +149,8 @@ void Part::RunALL() {
         // Run();
         // gettimeofday(&tv_end, nullptr);
         // UpdateAverageCycleTime(tv_start, tv_end);
-
+        state_->stage[(int)part_type_] =
+            (state_->stage[(int)part_type_] + 1) % 3;
         gettimeofday(&tv_end, nullptr);
         UpdateAverageCycleTime(tv_start, tv_end);
 

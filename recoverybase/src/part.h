@@ -7,6 +7,7 @@ class Part {
    public:
     PartType part_type_;
     State* state_;
+    int stage;
     Part(PartType parttype);
     virtual void SetCompulsiveCheckpoint();
     virtual void WaitCompulsiveCheckpoint();
