@@ -149,6 +149,8 @@ void Car::CreateStateDir() {
 
 // dump a part process state according to part type
 void Car::SaveState(PartType part) {
+    timeval ts, te;
+    gettimeofday(&ts, nullptr);
     cout << __FUNCTION__ << " ing " << part_pid_[part] << endl;
     string dir = "./checkpoint/" + to_string(part_pid_[part]);
     // cout << "``````````````````````````" << dir << " " << part_pid_[part]
@@ -167,7 +169,8 @@ void Car::SaveState(PartType part) {
         cout << "dump " << part_pid_[part] << " successfully" << endl;
     }
     close(fd);
-
+    gettimeofday(&te, nullptr);
+    cout << "store time " << diffus(te, ts) << " us" << endl;
     // string dir = "./checkpoint/" + to_string(part_pid_[part]);
     // char pid_buf[16];
     // sprintf(pid_buf, "%d", (int)part_pid_[part]);
@@ -387,8 +390,7 @@ void Car::Run() {
         // last_time = state_->times;
         // if (last_time && last_time != state_->times &&
         //     state_->times > FAULT_STEP && !faluted) {
-        if (state_->stage[2] == 2 && state_->times > FAULT_STEP &&
-            faluted == false) {
+        if (state_->times > FAULT_STEP && faluted == false) {
             faluted = true;
             // SimulateFalut(PartType::servoPID);
             SimulateFalut();
